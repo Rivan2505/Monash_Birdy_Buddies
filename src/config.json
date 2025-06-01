@@ -1,0 +1,5 @@
+{
+    "region": "us-east-1",
+    "userPoolId": "Your User Pool ID",
+    "clientId": "Your Client ID"
+}

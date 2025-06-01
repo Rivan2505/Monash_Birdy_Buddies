@@ -1,0 +1,80 @@
+.loginForm {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  margin: 1rem;
+}
+
+.loginForm h1 {
+  color: #333;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.loginForm h4 {
+  color: #666;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-weight: normal;
+}
+
+.loginForm .inputText {
+  width: 100%;
+  padding: 0.8rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.loginForm .inputText:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.loginForm button {
+  width: 100%;
+  padding: 0.8rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-bottom: 1rem;
+}
+
+.loginForm button:hover {
+  background-color: #0056b3;
+}
+
+.loginForm button:last-child {
+  background-color: transparent;
+  color: #007bff;
+  border: 1px solid #007bff;
+}
+
+.loginForm button:last-child:hover {
+  background-color: #f8f9fa;
+}
+
+@media (max-width: 480px) {
+  .loginForm {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+  
+  .loginForm .inputText {
+    padding: 0.6rem;
+  }
+  
+  .loginForm button {
+    padding: 0.6rem;
+  }
+} 
