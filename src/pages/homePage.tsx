@@ -34,10 +34,58 @@ const HomePage = () => {
 /*eslint-enable*/
 
   return (
-    <div className="homePage">
-      <h1>Hello World</h1>
-      <p>See console log for Amazon Cognito user tokens.</p>
-      <button onClick={handleLogout}>Logout</button>
+    <div className="home-container">
+      <nav className="top-nav">
+        <div className="nav-brand">
+          <img src="/bird-logo.png" alt="Monash Birdy Buddies Logo" className="nav-logo" />
+          <h1>Monash Birdy Buddies</h1>
+        </div>
+        <button onClick={handleLogout} className="logout-button">
+          <span className="logout-icon">🚪</span>
+          Logout
+        </button>
+      </nav>
+
+      <main className="main-content">
+        <div className="welcome-section">
+          <h2>Welcome to Your Bird Watching Hub</h2>
+          <p>Store, organize, and discover bird media from across Monash campuses</p>
+        </div>
+
+        <div className="features-grid">
+          <div className="feature-card">
+            <span className="feature-icon">📸</span>
+            <h3>Upload Media</h3>
+            <p>Share your bird photos, audio recordings, and videos</p>
+          </div>
+          <div className="feature-card">
+            <span className="feature-icon">🏷️</span>
+            <h3>Auto-Tagging</h3>
+            <p>Automatic species detection and tagging</p>
+          </div>
+          <div className="feature-card">
+            <span className="feature-icon">🔍</span>
+            <h3>Search</h3>
+            <p>Find media by species, location, or date</p>
+          </div>
+          <div className="feature-card">
+            <span className="feature-icon">👥</span>
+            <h3>Collaborate</h3>
+            <p>Work with researchers across campuses</p>
+          </div>
+        </div>
+
+        <div className="quick-actions">
+          <button className="action-button primary">
+            <span className="button-icon">📤</span>
+            Upload New Media
+          </button>
+          <button className="action-button secondary">
+            <span className="button-icon">🔍</span>
+            Browse Collection
+          </button>
+        </div>
+      </main>
     </div>
   );
 };
