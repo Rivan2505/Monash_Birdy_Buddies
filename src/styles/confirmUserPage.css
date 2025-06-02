@@ -1,17 +1,17 @@
 .loginForm {
   background: rgba(255, 255, 255, 0.85);
-  padding: 2rem 2.2rem;
+  padding: 1.2rem 2.2rem 1.2rem 2.2rem;
   border-radius: 20px;
   box-shadow: 0 8px 32px rgba(44, 62, 80, 0.13);
   width: 100%;
-  max-width: 350px;
+  max-width: 440px;
   margin: 2rem auto;
   position: relative;
   z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.1rem;
+  gap: 0.7rem;
   border: 1.5px solid rgba(76, 175, 80, 0.08);
   backdrop-filter: blur(8px);
 }
@@ -25,12 +25,12 @@
   letter-spacing: 0.01em;
 }
 
-.inputText {
+.inputText, .large-input {
   width: 100%;
-  padding: 0.7rem;
+  padding: 0.7rem 1.2rem;
   border: 1.5px solid #e0e0e0;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 1.08rem;
   transition: all 0.2s;
   background-color: #f8f9fa;
   margin-bottom: 0.2rem;
@@ -43,14 +43,14 @@
   background-color: #fff;
 }
 
-button {
+button, .primary-button, .large-btn.primary-button {
   width: 100%;
-  padding: 0.8rem;
+  padding: 0.7rem 0;
   background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 1.05rem;
+  font-size: 1.08rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;

@@ -27,10 +27,10 @@ const ConfirmUserPage = () => {
 return (
   <div className="loginForm">
     <h2>Confirm Account</h2>
-    <form onSubmit={handleSubmit}>
-      <div>
+    <form onSubmit={handleSubmit} className="form-fields">
+      <div className="input-group">
         <input
-          className="inputText"
+          className="inputText large-input"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -38,16 +38,16 @@ return (
           required
         />
       </div>
-      <div>
+      <div className="input-group">
         <input
-          className="inputText"
+          className="inputText large-input"
           type="text"
           value={confirmationCode}
           onChange={(e) => setConfirmationCode(e.target.value)}
           placeholder="Confirmation Code"
           required />
       </div>
-      <button type="submit">Confirm Account</button>
+      <button type="submit" className="primary-button large-btn">Confirm Account</button>
     </form>
   </div>
 );

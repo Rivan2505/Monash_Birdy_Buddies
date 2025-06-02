@@ -51,14 +51,13 @@ const LoginPage = () => {
     <div className="login-container">
       <div className="loginForm">
         <div className="logo-container">
-          <img src="/bird-logo.png" alt="Monash Birdy Buddies Logo" className="logo" />
           <h1>Monash Birdy Buddies</h1>
         </div>
         <h4>{isSignUp ? 'Join our bird watching community' : 'Welcome back to the nest!'}</h4>
-        <form onSubmit={isSignUp ? handleSignUp : handleSignIn}>
+        <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="form-fields">
           <div className="input-group">
             <input
-              className="inputText"
+              className="inputText large-input"
               id="email"
               type="email"
               value={email}
@@ -69,7 +68,7 @@ const LoginPage = () => {
           </div>
           <div className="input-group">
             <input
-              className="inputText"
+              className="inputText large-input"
               id="password"
               type="password"
               value={password}
@@ -81,7 +80,7 @@ const LoginPage = () => {
           {isSignUp && (
             <div className="input-group">
               <input
-                className="inputText"
+                className="inputText large-input"
                 id="confirmPassword"
                 type="password"
                 value={confirmPassword}
@@ -91,13 +90,13 @@ const LoginPage = () => {
               />
             </div>
           )}
-          <button type="submit" className="primary-button">
+          <button type="submit" className="primary-button large-btn">
             {isSignUp ? 'Join the Flock' : 'Sign In'}
           </button>
         </form>
         <button 
           onClick={() => setIsSignUp(!isSignUp)} 
-          className="secondary-button"
+          className="secondary-button large-btn"
         >
           {isSignUp ? 'Already have an account? Sign In' : 'New to Birdy Buddies? Sign Up'}
         </button>
