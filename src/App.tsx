@@ -7,6 +7,7 @@ import HomePage from './pages/homePage';
 import ConfirmUserPage from './pages/confirmUserPage';
 import './App.css'
 
+
 const App = () => {
   const isAuthenticated = () => {
     const accessToken = sessionStorage.getItem('accessToken');
