@@ -37,7 +37,7 @@ const HomePage = () => {
     <div className="home-container">
       <nav className="top-nav">
         <div className="nav-brand">
-          <img src="/bird-logo.png" alt="Monash Birdy Buddies Logo" className="nav-logo" />
+          <img src="bird.png" alt="Monash Birdy Buddies Logo" className="nav-logo" />
           <h1>Monash Birdy Buddies</h1>
         </div>
         <button onClick={handleLogout} className="logout-button">
