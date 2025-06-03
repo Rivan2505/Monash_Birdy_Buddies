@@ -205,56 +205,77 @@ body {
 .file-preview-item {
   display: flex;
   align-items: center;
-  background: #f4fcfa;
-  border: 1.5px solid #e0e0e0;
-  border-radius: 10px;
-  padding: 0.5rem 1rem;
-  box-shadow: 0 1px 4px rgba(44, 62, 80, 0.06);
-  position: relative;
-  min-height: 56px;
+  background: #fff;
+  border: none;
+  border-bottom: 1px solid #eee;
+  border-radius: 0;
+  padding: 1rem 0.5rem 1rem 0;
+  min-height: 64px;
   width: 100%;
   max-width: 100%;
+  position: relative;
+  box-shadow: none;
 }
 
 .file-thumb {
   width: 48px;
   height: 48px;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 6px;
   margin-right: 1rem;
-  border: 1px solid #b2dfdb;
+  border: 1px solid #eee;
   background: #fff;
 }
 
-.file-icon {
-  font-size: 2rem;
-  margin-right: 1rem;
+.file-info {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .file-name {
-  flex: 1 1 0;
   color: #2c3e50;
-  font-size: 1.05rem;
+  font-size: 1.08rem;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
   word-break: break-all;
-  white-space: normal;
-  margin-right: 1rem;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
+}
+
+.file-meta {
+  color: #888;
+  font-size: 0.98rem;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
 }
 
 .remove-file-btn {
   background: none;
   border: none;
   color: #e74c3c;
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   cursor: pointer;
-  margin-left: 0.5rem;
+  margin-left: 0.2rem;
+  padding: 0;
   transition: color 0.2s;
+  align-self: center;
+  width: 2em;
+  height: 2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
 .remove-file-btn:hover {
   color: #c0392b;
+}
+
+.trash-icon {
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .upload-progress-bar {

@@ -105,19 +105,34 @@ const UploadPage = () => {
           {/* File Preview */}
           {files.length > 0 && (
             <div className="file-preview-list">
-              {files.map((file, idx) => (
-                <div className="file-preview-item" key={idx}>
-                  {file.type.startsWith('image/') ? (
-                    <img src={URL.createObjectURL(file)} alt={file.name} className="file-thumb" />
-                  ) : file.type.startsWith('audio/') ? (
-                    <span className="file-icon">🎵</span>
-                  ) : file.type.startsWith('video/') ? (
-                    <span className="file-icon">🎬</span>
-                  ) : null}
-                  <span className="file-name">{file.name}</span>
-                  <button className="remove-file-btn" onClick={() => removeFile(idx)} title="Remove">&times;</button>
-                </div>
-              ))}
+              {files.map((file, idx) => {
+                const fileSizeMb = (file.size / (1024 * 1024)).toFixed(1);
+                const fileDate = new Date(file.lastModified).toLocaleDateString('en-GB', {
+                  day: 'numeric', month: 'long', year: 'numeric'
+                });
+                return (
+                  <div className="file-preview-item" key={idx}>
+                    {file.type.startsWith('image/') ? (
+                      <img src={URL.createObjectURL(file)} alt={file.name} className="file-thumb" />
+                    ) : file.type.startsWith('audio/') ? (
+                      <span className="file-icon">🎵</span>
+                    ) : file.type.startsWith('video/') ? (
+                      <span className="file-icon">🎬</span>
+                    ) : null}
+                    <div className="file-info">
+                      <div className="file-name">{file.name}</div>
+                      <div className="file-meta">
+                        <span>{fileDate}</span>
+                        <span>•</span>
+                        <span>{fileSizeMb}Mb</span>
+                      </div>
+                    </div>
+                    <button className="remove-file-btn" onClick={() => removeFile(idx)} title="Remove">
+                      <span className="trash-icon">🗑️</span>
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
 
