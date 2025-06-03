@@ -1,0 +1,78 @@
+.browse-title {
+  color: #2c3e50;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+}
+
+.gallery-card {
+  background: #f9fefb;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(44, 62, 80, 0.13);
+  padding: 1.2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1.5px solid #e0e0e0;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.gallery-card:hover {
+  box-shadow: 0 8px 32px rgba(44, 62, 80, 0.18);
+  transform: translateY(-4px) scale(1.02);
+}
+
+.gallery-thumb {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.gallery-thumb img {
+  width: 120px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #b2dfdb;
+  background: #fff;
+}
+.gallery-icon {
+  font-size: 3rem;
+  color: #4CAF50;
+}
+
+.gallery-info {
+  width: 100%;
+  text-align: center;
+}
+.gallery-filename {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 1.1rem;
+  margin-bottom: 0.3rem;
+  word-break: break-all;
+}
+.gallery-tags {
+  margin-bottom: 0.5rem;
+}
+.gallery-tag {
+  display: inline-block;
+  background: #eafaf1;
+  color: #219653;
+  border-radius: 6px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.93rem;
+  margin: 0 0.2rem 0.2rem 0;
+}
+.gallery-meta {
+  color: #888;
+  font-size: 0.95rem;
+} 

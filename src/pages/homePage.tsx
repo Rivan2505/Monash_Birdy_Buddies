@@ -51,17 +51,16 @@ const HomePage = () => {
           <h2>Welcome to Your Bird Watching Hub</h2>
           <p>Store, organize, and discover bird media from across Monash campuses</p>
         </div>
-        <div className="quick-actions">
-          <button className="action-button secondary">
-            <span className="button-icon">🔍</span>
-            Browse Collection
-          </button>
-        </div>
         <div className="features-grid">
           <div className="feature-card" onClick={() => navigate('/upload')} style={{ cursor: 'pointer' }}>
             <span className="feature-icon">📸</span>
             <h3>Upload Media</h3>
             <p>Share your bird photos, audio recordings, and videos</p>
+          </div>
+          <div className="feature-card" onClick={() => navigate('/browse')} style={{ cursor: 'pointer' }}>
+            <span className="feature-icon">🗂️</span>
+            <h3>Browse Collection</h3>
+            <p>View and search all uploaded bird media</p>
           </div>
           <div className="feature-card">
             <span className="feature-icon">🏷️</span>
@@ -69,13 +68,11 @@ const HomePage = () => {
             <p>Automatic species detection and tagging</p>
           </div>
           <div className="feature-card">
-            <span className="feature-icon">🔍</span>
-            <h3>Search</h3>
-            <p>Find media by species, location, or date</p>
+            <span className="feature-icon">👥</span>
+            <h3>Collaborate</h3>
+            <p>Work with researchers across campuses</p>
           </div>
         </div>
-
-        
       </main>
     </div>
   );

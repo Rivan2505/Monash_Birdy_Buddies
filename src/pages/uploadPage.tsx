@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../styles/uploadPage.css';
+import BackButton from '../components/BackButton';
 
 const ACCEPTED_TYPES = [
   'image/jpeg', 'image/png', 'image/heic',
@@ -17,6 +19,7 @@ const UploadPage = () => {
   const [progress, setProgress] = useState(0);
   const [success, setSuccess] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
   // Handle file selection (button or drag-and-drop)
   const handleFiles = (selected: FileList | null) => {
@@ -74,6 +77,7 @@ const UploadPage = () => {
         </button>
       </nav>
       <main className="main-content">
+        <BackButton/>
         <div className="upload-card">
           <h2 className="upload-title">📸 Upload Bird Media</h2>
           <p className="upload-subtitle">Share your bird photos, audio recordings, and videos with the research community</p>

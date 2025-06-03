@@ -6,6 +6,7 @@ import LoginPage from './pages/loginPage';
 import HomePage from './pages/homePage';
 import ConfirmUserPage from './pages/confirmUserPage';
 import UploadPage from './pages/uploadPage';
+import BrowsePage from './pages/browsePage';
 import './App.css'
 
 
@@ -23,6 +24,7 @@ const App = () => {
         <Route path="/confirm" element={<ConfirmUserPage />} />
         <Route path="/home" element={isAuthenticated() ? <HomePage /> : <Navigate replace to="/login" />} />
         <Route path="/upload" element={isAuthenticated() ? <UploadPage /> : <Navigate replace to="/login" />} />
+        <Route path="/browse" element={isAuthenticated() ? <BrowsePage /> : <Navigate replace to="/login" />} />
       </Routes>
     </BrowserRouter>
   );
