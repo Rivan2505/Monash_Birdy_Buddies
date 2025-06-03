@@ -51,9 +51,14 @@ const HomePage = () => {
           <h2>Welcome to Your Bird Watching Hub</h2>
           <p>Store, organize, and discover bird media from across Monash campuses</p>
         </div>
-
+        <div className="quick-actions">
+          <button className="action-button secondary">
+            <span className="button-icon">🔍</span>
+            Browse Collection
+          </button>
+        </div>
         <div className="features-grid">
-          <div className="feature-card">
+          <div className="feature-card" onClick={() => navigate('/upload')} style={{ cursor: 'pointer' }}>
             <span className="feature-icon">📸</span>
             <h3>Upload Media</h3>
             <p>Share your bird photos, audio recordings, and videos</p>
@@ -75,16 +80,7 @@ const HomePage = () => {
           </div>
         </div>
 
-        <div className="quick-actions">
-          <button className="action-button primary">
-            <span className="button-icon">📤</span>
-            Upload New Media
-          </button>
-          <button className="action-button secondary">
-            <span className="button-icon">🔍</span>
-            Browse Collection
-          </button>
-        </div>
+        
       </main>
     </div>
   );

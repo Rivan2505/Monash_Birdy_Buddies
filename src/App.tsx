@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/loginPage';
 import HomePage from './pages/homePage';
 import ConfirmUserPage from './pages/confirmUserPage';
+import UploadPage from './pages/uploadPage';
 import './App.css'
 
 
@@ -21,6 +22,7 @@ const App = () => {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/confirm" element={<ConfirmUserPage />} />
         <Route path="/home" element={isAuthenticated() ? <HomePage /> : <Navigate replace to="/login" />} />
+        <Route path="/upload" element={isAuthenticated() ? <UploadPage /> : <Navigate replace to="/login" />} />
       </Routes>
     </BrowserRouter>
   );
