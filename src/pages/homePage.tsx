@@ -73,11 +73,6 @@ const HomePage = () => {
             <h3>Search</h3>
             <p>Find media by species, location, or date</p>
           </div>
-          <div className="feature-card">
-            <span className="feature-icon">👥</span>
-            <h3>Collaborate</h3>
-            <p>Work with researchers across campuses</p>
-          </div>
         </div>
 
         
