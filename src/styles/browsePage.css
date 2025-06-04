@@ -75,4 +75,191 @@
 .gallery-meta {
   color: #888;
   font-size: 0.95rem;
+}
+
+.browse-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.view-toggle button {
+  background: #f4f8ff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 1.2rem;
+  margin-left: 0.3rem;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.view-toggle button.active {
+  background: #4CAF50;
+  color: #fff;
+}
+
+.search-panel {
+  background: #f4fcfa;
+  border-radius: 14px;
+  padding: 1.2rem 1rem;
+  margin-bottom: 1.2rem;
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.06);
+  border: 1.5px solid #e0e0e0;
+}
+.search-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-bottom: 0.7rem;
+}
+.species-chips {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.species-chip {
+  background: #eafaf1;
+  color: #219653;
+  border-radius: 6px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.93rem;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+.species-chip button {
+  background: none;
+  border: none;
+  color: #e74c3c;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-left: 0.2rem;
+}
+
+.results-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.7rem;
+  font-size: 1.05rem;
+  color: #2c3e50;
+}
+
+.bulk-actions-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #fbeaea;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  margin-bottom: 1.2rem;
+  font-size: 1.02rem;
+}
+.bulk-actions-bar button {
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.3rem 0.9rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-left: 0.2rem;
+  transition: background 0.2s;
+}
+.bulk-actions-bar button:disabled {
+  background: #bdbdbd;
+  cursor: not-allowed;
+}
+
+.gallery-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  margin-bottom: 2.5rem;
+}
+.gallery-list-item {
+  display: flex;
+  align-items: flex-start;
+  background: #f9fefb;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+  padding: 1rem 1.2rem;
+  border: 1.5px solid #e0e0e0;
+  gap: 1.2rem;
+}
+.gallery-list-item .gallery-thumb {
+  margin-bottom: 0;
+  min-width: 120px;
+}
+.gallery-list-item .gallery-info {
+  text-align: left;
+}
+
+.gallery-species-tags {
+  margin-bottom: 0.5rem;
+}
+
+.gallery-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.gallery-actions button {
+  background: #eaf3fb;
+  color: #1976d2;
+  border: none;
+  border-radius: 6px;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.97rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.gallery-actions button:hover {
+  background: #1976d2;
+  color: #fff;
+}
+.gallery-actions a {
+  background: #eafaf1;
+  color: #219653;
+  border-radius: 6px;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.97rem;
+  font-weight: 500;
+  text-decoration: none;
+  margin-left: 0.2rem;
+  transition: background 0.2s, color 0.2s;
+}
+.gallery-actions a:hover {
+  background: #219653;
+  color: #fff;
+}
+
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-bottom: 2rem;
+}
+.pagination-bar button {
+  background: #f4f8ff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 1rem;
+  padding: 0.3rem 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.pagination-bar button.active, .pagination-bar button:focus {
+  background: #4CAF50;
+  color: #fff;
+}
+.pagination-bar button:disabled {
+  background: #bdbdbd;
+  color: #fff;
+  cursor: not-allowed;
 } 

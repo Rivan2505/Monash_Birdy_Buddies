@@ -10,6 +10,8 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleSignIn = async (e: { preventDefault: () => void; }) => {
@@ -69,24 +71,42 @@ const LoginPage = () => {
             <input
               className="inputText large-input"
               id="password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
               required
             />
+            <div className="show-password-checkbox">
+              <input
+                type="checkbox"
+                id="showPassword"
+                checked={showPassword}
+                onChange={() => setShowPassword((prev) => !prev)}
+              />
+              <label htmlFor="showPassword">Show password</label>
+            </div>
           </div>
           {isSignUp && (
             <div className="input-group">
               <input
                 className="inputText large-input"
                 id="confirmPassword"
-                type="password"
+                type={showConfirmPassword ? 'text' : 'password'}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirm Password"
                 required
               />
+              <div className="show-password-checkbox">
+                <input
+                  type="checkbox"
+                  id="showConfirmPassword"
+                  checked={showConfirmPassword}
+                  onChange={() => setShowConfirmPassword((prev) => !prev)}
+                />
+                <label htmlFor="showConfirmPassword">Show confirm password</label>
+              </div>
             </div>
           )}
           <button type="submit" className="primary-button large-btn">

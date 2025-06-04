@@ -64,6 +64,11 @@ const UploadPage = () => {
     setFiles(files => files.filter((_, i) => i !== index));
   };
 
+  const handleLogout = () => {
+    sessionStorage.clear();
+    navigate('/login');
+  };
+
   return (
     <div className="home-container">
       <nav className="top-nav">
@@ -71,7 +76,7 @@ const UploadPage = () => {
           <img src="bird.png" alt="Monash Birdy Buddies Logo" className="nav-logo" />
           <h1>Monash Birdy Buddies</h1>
         </div>
-        <button className="logout-button">
+        <button className="logout-button" onClick={handleLogout}>
           <span className="logout-icon">🚪</span>
           Logout
         </button>
