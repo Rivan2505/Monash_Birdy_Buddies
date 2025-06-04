@@ -57,6 +57,8 @@ const PAGE_SIZE = 8;
 const BrowsePage = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const [subscribedTags, setSubscribedTags] = useState<string[]>([]);
+  const [emailNotifications, setEmailNotifications] = useState<{ [key: string]: boolean }>({});
 
   // Search/filter state
   const [speciesFilters, setSpeciesFilters] = useState<{ [key: string]: number }>({});
@@ -192,6 +194,25 @@ const BrowsePage = () => {
     } catch (err) {
       showToast('Failed to download file.', 'error');
     }
+  };
+
+  // Tag-based Notifications UI
+  const handleSubscribe = (tag: string) => {
+    if (!subscribedTags.includes(tag)) {
+      setSubscribedTags([...subscribedTags, tag]);
+      showToast(`Subscribed to notifications for ${tag}`, 'success');
+    } else {
+      setSubscribedTags(subscribedTags.filter(t => t !== tag));
+      showToast(`Unsubscribed from notifications for ${tag}`, 'info');
+    }
+  };
+
+  const handleEmailNotification = (tag: string) => {
+    setEmailNotifications(prev => ({
+      ...prev,
+      [tag]: !prev[tag]
+    }));
+    showToast(`Email notifications ${emailNotifications[tag] ? 'disabled' : 'enabled'} for ${tag}`, 'info');
   };
 
   return (
@@ -365,6 +386,35 @@ const BrowsePage = () => {
             </div>
           </div>
         )}
+
+        {/* Tag-based Notifications UI */}
+        <div className="tag-notifications-section">
+          <h3>Tag-based Notifications</h3>
+          <select onChange={(e) => handleSubscribe(e.target.value)}>
+            <option value="">Select a tag</option>
+            {SPECIES_LIST.map(tag => (
+              <option key={tag} value={tag}>{tag}</option>
+            ))}
+          </select>
+          <div>
+            <h4>Subscribed Tags:</h4>
+            <ul>
+              {subscribedTags.map(tag => (
+                <li key={tag}>
+                  {tag}
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={emailNotifications[tag] || false}
+                      onChange={() => handleEmailNotification(tag)}
+                    />
+                    Email Notifications
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </main>
     </div>
   );
