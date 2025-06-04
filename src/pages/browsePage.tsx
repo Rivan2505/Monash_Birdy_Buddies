@@ -70,6 +70,8 @@ const BrowsePage = () => {
   const [selected, setSelected] = useState<number[]>([]);
   const [page, setPage] = useState(1);
   const [searchFile, setSearchFile] = useState<File | null>(null);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Filtering logic (simulate backend query)
   let filtered = mockMedia.filter(item => {
@@ -143,8 +145,8 @@ const BrowsePage = () => {
 
   // Card actions (stubbed)
   const handleView = (item: any) => {
-    showToast('View file: ' + item.filename, 'info');
-    // TODO: Open modal or navigate to detail page
+    setSelectedItem(item);
+    setIsModalOpen(true);
   };
   const handleEditTags = (item: any) => {
     showToast('Edit tags for: ' + item.filename, 'info');
@@ -341,6 +343,28 @@ const BrowsePage = () => {
           ))}
           <button onClick={() => goToPage(page + 1)} disabled={page === totalPages}>Next →</button>
         </div>
+
+        {/* File Details/Preview Modal */}
+        {isModalOpen && selectedItem && (
+          <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
+            <div className="modal-content" onClick={e => e.stopPropagation()}>
+              <h3>{selectedItem.filename}</h3>
+              {selectedItem.type === 'image' ? (
+                <img src={selectedItem.url} alt={selectedItem.filename} style={{ maxWidth: '100%', maxHeight: '80vh' }} />
+              ) : selectedItem.type === 'audio' ? (
+                <audio controls src={selectedItem.url} style={{ width: '100%' }} />
+              ) : selectedItem.type === 'video' ? (
+                <video controls src={selectedItem.url} style={{ maxWidth: '100%', maxHeight: '80vh' }} />
+              ) : null}
+              <div>
+                <p>Uploader: {selectedItem.uploader}</p>
+                <p>Date: {selectedItem.date}</p>
+                <p>Species: {Object.entries(selectedItem.species).map(([sp, count]) => `${sp}: ${count}`).join(', ')}</p>
+              </div>
+              <button onClick={() => setIsModalOpen(false)}>Close</button>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
