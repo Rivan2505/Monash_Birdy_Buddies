@@ -222,8 +222,7 @@ input::placeholder {
 }
 
 /* Remove old password-group and toggle-password-btn styles if present */
-.password-group {}
-.toggle-password-btn {}
+
 
 .inputText.large-input {
   padding-right: 2rem;
