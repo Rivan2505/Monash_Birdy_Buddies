@@ -5,6 +5,7 @@ import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/uploadPage.css';
 import BackButton from '../components/BackButton';
+import { useToast } from './ToastContext';
 
 const ACCEPTED_TYPES = [
   'image/jpeg', 'image/png', 'image/heic',
@@ -20,6 +21,7 @@ const UploadPage = () => {
   const [success, setSuccess] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   // Handle file selection (button or drag-and-drop)
   const handleFiles = (selected: FileList | null) => {
@@ -51,6 +53,7 @@ const UploadPage = () => {
           clearInterval(interval);
           setUploading(false);
           setSuccess(true);
+          showToast('Upload successful!', 'success');
           return 100;
         }
         return prev + 10;

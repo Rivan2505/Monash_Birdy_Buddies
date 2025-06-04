@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signIn, signUp } from '../authService';
 import '../styles/loginPage.css';
+import { useToast } from './ToastContext';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -13,6 +14,7 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const handleSignIn = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
@@ -22,29 +24,31 @@ const LoginPage = () => {
       if (session && typeof session.AccessToken !== 'undefined') {
         sessionStorage.setItem('accessToken', session.AccessToken);
         if (sessionStorage.getItem('accessToken')) {
+          showToast('Login successful!', 'success');
           window.location.href = '/home';
         } else {
-          console.error('Session token was not set properly.');
+          showToast('Session token was not set properly.', 'error');
         }
       } else {
-        console.error('SignIn session or AccessToken is undefined.');
+        showToast('SignIn session or AccessToken is undefined.', 'error');
       }
     } catch (error) {
-      alert(`Sign in failed: ${error}`);
+      showToast(`Sign in failed: ${error}`, 'error');
     }
   };
 
   const handleSignUp = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      alert('Passwords do not match');
+      showToast('Passwords do not match', 'error');
       return;
     }
     try {
       await signUp(email, password);
+      showToast('Sign up successful! Please confirm your email.', 'success');
       navigate('/confirm', { state: { email } });
     } catch (error) {
-      alert(`Sign up failed: ${error}`);
+      showToast(`Sign up failed: ${error}`, 'error');
     }
   };
 

@@ -5,10 +5,12 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { confirmSignUp } from '../authService';
 import '../styles/confirmUserPage.css';
+import { useToast } from './ToastContext';
 
 const ConfirmUserPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { showToast } = useToast();
   // eslint-disable-next-line
   const [email, setEmail] = useState(location.state?.email || '');
   const [confirmationCode, setConfirmationCode] = useState('');
@@ -17,10 +19,10 @@ const ConfirmUserPage = () => {
     e.preventDefault();
     try {
       await confirmSignUp(email, confirmationCode);
-      alert("Account confirmed successfully!\nSign in on next page.");
+      showToast("Account confirmed successfully! Sign in on next page.", 'success');
       navigate('/login');
     } catch (error) {
-      alert(`Failed to confirm account: ${error}`);
+      showToast(`Failed to confirm account: ${error}`, 'error');
     }
   };
 

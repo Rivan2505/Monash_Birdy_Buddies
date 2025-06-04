@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/browsePage.css';
 import BackButton from '../components/BackButton';
+import { useToast } from './ToastContext';
 
 // Mock species list for dropdown
 const SPECIES_LIST = ['crow', 'pigeon', 'eagle', 'wren', 'song thrush', 'raptor'];
@@ -55,6 +56,7 @@ const PAGE_SIZE = 8;
 
 const BrowsePage = () => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   // Search/filter state
   const [speciesFilters, setSpeciesFilters] = useState<{ [key: string]: number }>({});
@@ -131,25 +133,25 @@ const BrowsePage = () => {
 
   // Bulk actions (stubbed)
   const handleBulkDelete = () => {
-    alert('Bulk delete: ' + selected.join(', '));
+    showToast('Bulk delete: ' + selected.join(', '), 'info');
     // TODO: Integrate with backend
   };
   const handleBulkTag = () => {
-    alert('Bulk tag: ' + selected.join(', '));
+    showToast('Bulk tag: ' + selected.join(', '), 'info');
     // TODO: Integrate with backend
   };
 
   // Card actions (stubbed)
   const handleView = (item: any) => {
-    alert('View file: ' + item.filename);
+    showToast('View file: ' + item.filename, 'info');
     // TODO: Open modal or navigate to detail page
   };
   const handleEditTags = (item: any) => {
-    alert('Edit tags for: ' + item.filename);
+    showToast('Edit tags for: ' + item.filename, 'info');
     // TODO: Open tag editor modal
   };
   const handleDelete = (item: any) => {
-    alert('Delete file: ' + item.filename);
+    showToast('Delete file: ' + item.filename, 'info');
     // TODO: Integrate with backend
   };
 
@@ -184,8 +186,9 @@ const BrowsePage = () => {
       document.body.appendChild(link);
       link.click();
       link.remove();
+      showToast('Download started: ' + filename, 'success');
     } catch (err) {
-      alert('Failed to download file.');
+      showToast('Failed to download file.', 'error');
     }
   };
 
