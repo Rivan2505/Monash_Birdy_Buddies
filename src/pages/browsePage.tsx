@@ -74,6 +74,8 @@ const BrowsePage = () => {
   const [searchFile, setSearchFile] = useState<File | null>(null);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [similarResults, setSimilarResults] = useState<any[]>([]);
+  const [showSimilar, setShowSimilar] = useState(false);
 
   // Filtering logic (simulate backend query)
   let filtered = mockMedia.filter(item => {
@@ -215,6 +217,22 @@ const BrowsePage = () => {
     showToast(`Email notifications ${emailNotifications[tag] ? 'disabled' : 'enabled'} for ${tag}`, 'info');
   };
 
+  const handleFindSimilar = () => {
+    if (!searchFile) {
+      showToast('Please upload an image to find similar birds.', 'error');
+      setShowSimilar(false);
+      return;
+    }
+    // Mock similar results (could be random subset of mockMedia)
+    const mockSimilar = mockMedia.slice(0, 3).map((item, idx) => ({
+      ...item,
+      similarity: (0.95 - idx * 0.1).toFixed(2) // Mock similarity score
+    }));
+    setSimilarResults(mockSimilar);
+    setShowSimilar(true);
+    showToast('Showing mock similar bird results.', 'info');
+  };
+
   return (
     <div className="home-container">
       <nav className="top-nav">
@@ -275,7 +293,7 @@ const BrowsePage = () => {
             <input type="file" onChange={e => setSearchFile(e.target.files?.[0] || null)} />
           </div>
           <div className="button-row">
-            <div className="stub-btn">FIND SIMILAR (STUB)</div>
+            <button className="stub-btn" onClick={handleFindSimilar}>FIND SIMILAR (STUB)</button>
             <button className="clear-btn" onClick={clearFilters}>CLEAR FILTERS</button>
             <button className="search-btn" onClick={() => setPage(1)}>SEARCH</button>
           </div>
@@ -415,6 +433,33 @@ const BrowsePage = () => {
             </ul>
           </div>
         </div>
+
+        {showSimilar && (
+          <div className="similar-results-section">
+            <h3>Similar Bird Images (Mock Results)</h3>
+            <div className="gallery-grid">
+              {similarResults.map(item => (
+                <div className="gallery-card" key={item.id}>
+                  <div className="gallery-thumb">
+                    {item.type === 'image' ? (
+                      <img src={item.url} alt={item.filename} />
+                    ) : item.type === 'audio' ? (
+                      <span className="gallery-icon" role="img" aria-label="audio">🎵</span>
+                    ) : item.type === 'video' ? (
+                      <span className="gallery-icon" role="img" aria-label="video">🎬</span>
+                    ) : null}
+                  </div>
+                  <div className="gallery-info">
+                    <div className="gallery-filename">{item.filename}</div>
+                    <div className="gallery-meta">
+                      <span>Similarity: {item.similarity}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
