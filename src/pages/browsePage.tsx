@@ -23,7 +23,7 @@ const mockMedia = [
   {
     id: 2,
     type: 'audio',
-    url: '',
+    url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
     filename: 'song-thrush.mp3',
     species: { 'song thrush': 1 },
     uploader: 'Bob',
@@ -32,7 +32,7 @@ const mockMedia = [
   {
     id: 3,
     type: 'video',
-    url: '',
+    url: 'https://www.w3schools.com/html/mov_bbb.mp4',
     filename: 'raptor-flight.mp4',
     species: { raptor: 1 },
     uploader: 'Carol',
@@ -174,6 +174,21 @@ const BrowsePage = () => {
     navigate('/login');
   };
 
+  const handleDownload = async (url: string, filename: string) => {
+    try {
+      const response = await fetch(url, { mode: 'cors' });
+      const blob = await response.blob();
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      alert('Failed to download file.');
+    }
+  };
+
   return (
     <div className="home-container">
       <nav className="top-nav">
@@ -192,8 +207,12 @@ const BrowsePage = () => {
           <BackButton />
           <h2 className="browse-title">Browse Collection</h2>
           <div className="view-toggle">
-            <button onClick={() => handleViewMode('grid')} className={viewMode === 'grid' ? 'active' : ''}>🔲</button>
-            <button onClick={() => handleViewMode('list')} className={viewMode === 'list' ? 'active' : ''}>📋</button>
+            <button onClick={() => handleViewMode('grid')} className={viewMode === 'grid' ? 'active' : ''}>
+              🔲 <span className="icon-label">Grid</span>
+            </button>
+            <button onClick={() => handleViewMode('list')} className={viewMode === 'list' ? 'active' : ''}>
+              📋 <span className="icon-label">List</span>
+            </button>
           </div>
         </div>
 
@@ -207,8 +226,8 @@ const BrowsePage = () => {
                 <option value={sp} key={sp}>{sp}</option>
               ))}
             </select>
-            <input type="number" min={1} value={speciesCount} onChange={e => setSpeciesCount(Number(e.target.value))} style={{ width: 50 }} />
-            <button onClick={addSpecies} disabled={!speciesInput}>Add</button>
+            <input type="number" min={1} value={speciesCount} onChange={e => setSpeciesCount(Number(e.target.value))} />
+            <button onClick={addSpecies} disabled={!speciesInput} className="add-btn">ADD</button>
             <div className="species-chips">
               {Object.entries(speciesFilters).map(([sp, count]) => (
                 <span className="species-chip" key={sp}>{sp}: {count} <button onClick={() => removeSpecies(sp)} title="Remove">×</button></span>
@@ -217,18 +236,22 @@ const BrowsePage = () => {
           </div>
           <div className="search-row">
             <label>📊 Minimum Count:</label>
-            <input type="number" min={1} value={minCount} onChange={e => setMinCount(Number(e.target.value))} style={{ width: 50 }} />
+            <input type="number" min={1} value={minCount} onChange={e => setMinCount(Number(e.target.value))} />
             <label>📁 File Type:</label>
             <select value={fileType} onChange={e => setFileType(e.target.value)}>
               {FILE_TYPES.map(type => <option value={type} key={type}>{type}</option>)}
             </select>
             <label>🔗 Thumbnail URL:</label>
             <input type="text" value={thumbnailUrl} onChange={e => setThumbnailUrl(e.target.value)} placeholder="Enter URL or filename" />
-            <label>📤 Upload file to find similar:</label>
+          </div>
+          <div className="search-row">
+            <label>📋 Upload file to find similar:</label>
             <input type="file" onChange={e => setSearchFile(e.target.files?.[0] || null)} />
-            <button onClick={() => {}} disabled>Find Similar (stub)</button>
-            <button onClick={clearFilters}>Clear Filters</button>
-            <button onClick={() => setPage(1)}>Search</button>
+          </div>
+          <div className="button-row">
+            <div className="stub-btn">FIND SIMILAR (STUB)</div>
+            <button className="clear-btn" onClick={clearFilters}>CLEAR FILTERS</button>
+            <button className="search-btn" onClick={() => setPage(1)}>SEARCH</button>
           </div>
         </div>
 
@@ -243,10 +266,16 @@ const BrowsePage = () => {
 
         {/* Bulk Actions Bar */}
         <div className="bulk-actions-bar">
-          <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} /> Select All
-          <span> | Selected: {selected.length} </span>
-          <button onClick={handleBulkDelete} disabled={selected.length === 0}>Delete</button>
-          <button onClick={handleBulkTag} disabled={selected.length === 0}>Tag</button>
+          <div className="bulk-left">
+            <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} id="selectAll" />
+            <label htmlFor="selectAll">Select All</label>
+            <span>|</span>
+            <span>Selected: {selected.length}</span>
+          </div>
+          <div className="bulk-btn-row">
+            <button onClick={handleBulkDelete} disabled={selected.length === 0}>DELETE</button>
+            <button onClick={handleBulkTag} disabled={selected.length === 0}>TAG</button>
+          </div>
         </div>
 
         {/* Media Grid/List */}
@@ -254,6 +283,24 @@ const BrowsePage = () => {
           {paged.map(item => (
             <div className={viewMode === 'grid' ? 'gallery-card' : 'gallery-list-item'} key={item.id}>
               <input type="checkbox" checked={selected.includes(item.id)} onChange={() => toggleSelect(item.id)} />
+              {/* Download icon with label in top right for audio/video */}
+              {item.type !== 'image' && item.url && (
+                <a
+                  href={item.url}
+                  download={item.filename}
+                  className="download-icon-link"
+                  title="Download"
+                >
+                  <span className="download-svg" aria-label="download">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="5" x2="12" y2="17" />
+                      <polyline points="19 12 12 19 5 12" />
+                      <path d="M5 19h14" />
+                    </svg>
+                  </span>
+                  <span className="download-label">Download</span>
+                </a>
+              )}
               <div className="gallery-thumb" onClick={() => handleView(item)} style={{ cursor: 'pointer' }}>
                 {item.type === 'image' ? (
                   <img src={item.url} alt={item.filename} />
@@ -274,10 +321,9 @@ const BrowsePage = () => {
                   <span>By {item.uploader}</span> | <span>{item.date}</span>
                 </div>
                 <div className="gallery-actions">
-                  <button onClick={() => handleView(item)}>View</button>
-                  <button onClick={() => handleEditTags(item)}>Edit Tags</button>
-                  <button onClick={() => handleDelete(item)}>Delete</button>
-                  {item.type !== 'image' && <a href={item.url || '#'} download={item.filename}>Download</a>}
+                  <button onClick={() => handleView(item)}>VIEW</button>
+                  <button onClick={() => handleEditTags(item)}>EDIT TAGS</button>
+                  <button onClick={() => handleDelete(item)}>DELETE</button>
                 </div>
               </div>
             </div>
