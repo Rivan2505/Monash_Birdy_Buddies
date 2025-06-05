@@ -97,6 +97,7 @@ body {
   margin-bottom: 0.2rem;
   box-shadow: none;
   transition: border-color 0.2s, box-shadow 0.2s;
+  color: black;
 }
 
 .loginForm .inputText:focus, .large-input:focus {
@@ -202,7 +203,6 @@ input::placeholder {
 }
 
 .large-btn {
-  height: 54px;
   font-size: 1.18rem !important;
   border-radius: 10px !important;
   width: 100%;

@@ -10,6 +10,8 @@ const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -43,8 +45,12 @@ const LoginPage = () => {
       showToast('Passwords do not match', 'error');
       return;
     }
+    if (!firstName.trim() || !lastName.trim()) {
+      showToast('First name and last name are required', 'error');
+      return;
+    }
     try {
-      await signUp(email, password);
+      await signUp(email, password, firstName, lastName);
       showToast('Sign up successful! Please confirm your email.', 'success');
       navigate('/confirm', { state: { email } });
     } catch (error) {
@@ -60,6 +66,32 @@ const LoginPage = () => {
         </div>
         <h4>{isSignUp ? 'Join our bird watching community' : 'Welcome back to the nest!'}</h4>
         <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="form-fields">
+          {isSignUp && (
+            <>
+              <div className="input-group">
+                <input
+                  className="inputText large-input"
+                  id="firstName"
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="First Name"
+                  required
+                />
+              </div>
+              <div className="input-group">
+                <input
+                  className="inputText large-input"
+                  id="lastName"
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder="Last Name"
+                  required
+                />
+              </div>
+            </>
+          )}
           <div className="input-group">
             <input
               className="inputText large-input"

@@ -62,16 +62,6 @@ const HomePage = () => {
             <h3>Browse Collection</h3>
             <p>View and search all uploaded bird media</p>
           </div>
-          <div className="feature-card">
-            <span className="feature-icon">🏷️</span>
-            <h3>Auto-Tagging</h3>
-            <p>Automatic species detection and tagging</p>
-          </div>
-          <div className="feature-card">
-            <span className="feature-icon">👥</span>
-            <h3>Collaborate</h3>
-            <p>Work with researchers across campuses</p>
-          </div>
         </div>
       </main>
     </div>
