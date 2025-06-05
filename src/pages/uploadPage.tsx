@@ -11,7 +11,7 @@ import { getUserSub } from '../utils/auth';
 
 const ACCEPTED_TYPES = [
   'image/jpeg', 'image/png', 'image/heic',
-  'audio/mp3', 'audio/wav', 'audio/m4a',
+  'audio/mpeg', 'audio/wav', 'audio/m4a', 'audio/mp4',
   'video/mp4', 'video/quicktime', 'video/x-msvideo'
 ];
 
