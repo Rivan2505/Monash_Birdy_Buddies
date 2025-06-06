@@ -70,7 +70,7 @@ const UploadPage = () => {
       console.log('All files uploaded successfully:', uploadedKeys);
       setUploading(false);
       setSuccess(true);
-      showToast(`Successfully uploaded ${files.length} file${files.length > 1 ? 's' : ''} to S3!`, 'success');
+      showToast(`Successfully uploaded ${files.length} file${files.length > 1 ? 's' : ''} to S3! You will be able to view them in the media library soon.`, 'success');
       
       // Clear files after successful upload
       setFiles([]);
