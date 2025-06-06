@@ -6,10 +6,12 @@ import { useNavigate } from 'react-router-dom';
 import '../styles/uploadPage.css';
 import BackButton from '../components/BackButton';
 import { useToast } from './ToastContext';
+import { uploadMultipleFilesToS3 } from '../s3Service';
+import { getUserSub } from '../utils/auth';
 
 const ACCEPTED_TYPES = [
   'image/jpeg', 'image/png', 'image/heic',
-  'audio/mp3', 'audio/wav', 'audio/m4a',
+  'audio/mpeg', 'audio/wav', 'audio/m4a', 'audio/mp4',
   'video/mp4', 'video/quicktime', 'video/x-msvideo'
 ];
 
@@ -41,25 +43,44 @@ const UploadPage = () => {
     e.preventDefault();
   };
 
-  // Simulate upload
-  const handleUpload = () => {
+  // Handle S3 upload
+  const handleUpload = async () => {
+    if (files.length === 0) {
+      showToast('Please select files to upload', 'error');
+      return;
+    }
+
+    const userSub = getUserSub();
+    
+    if (!userSub) {
+      showToast('User authentication error. Please login again.', 'error');
+      navigate('/login');
+      return;
+    }
+
     setUploading(true);
     setProgress(0);
     setSuccess(false);
-    // Simulate upload progress
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setUploading(false);
-          setSuccess(true);
-          showToast('Upload successful!', 'success');
-          return 100;
-        }
-        return prev + 10;
+
+    try {
+      const uploadedKeys = await uploadMultipleFilesToS3(files, userSub, (progress) => {
+        setProgress(progress);
       });
-    }, 150);
-    // Here you would call your backend API with files and manualTags
+
+      console.log('All files uploaded successfully:', uploadedKeys);
+      setUploading(false);
+      setSuccess(true);
+      showToast(`Successfully uploaded ${files.length} file${files.length > 1 ? 's' : ''} to S3! You will be able to view them in the media library soon.`, 'success');
+      
+      // Clear files after successful upload
+      setFiles([]);
+      
+    } catch (error) {
+      console.error('Upload failed:', error);
+      setUploading(false);
+      setSuccess(false);
+      showToast('Upload failed. Please try again.', 'error');
+    }
   };
 
   // Remove a file
@@ -169,18 +190,6 @@ const UploadPage = () => {
               <div className="type-title">Videos</div>
               <div className="type-desc">MP4, MOV, AVI</div>
             </div>
-          </div>
-          <div className="manual-tags-section">
-            <label htmlFor="manual-tags" className="manual-tags-label">Add Manual Tags (Optional)</label>
-            <input
-              id="manual-tags"
-              className="manual-tags-input"
-              type="text"
-              value={manualTags}
-              onChange={e => setManualTags(e.target.value)}
-              placeholder="Enter bird species, location, or other tags..."
-            />
-            <div className="manual-tags-desc">Separate multiple tags with commas. AI will also auto-detect bird species.</div>
           </div>
           <button
             className="upload-btn"
