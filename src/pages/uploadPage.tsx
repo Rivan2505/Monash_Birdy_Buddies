@@ -109,7 +109,23 @@ const UploadPage = () => {
         <BackButton/>
         <div className="upload-card">
           <h2 className="upload-title">📸 Upload Bird Media</h2>
-          <p className="upload-subtitle">Share your bird photos, audio recordings, and videos with the research community</p>
+          <p className="upload-subtitle">Share your bird photos, audio recordings, and videos with the research community</p><div className="upload-types-row">
+            <div className="upload-type-card image">
+              <span className="type-icon">📷</span>
+              <div className="type-title">Images</div>
+              <div className="type-desc">JPG, PNG, HEIC</div>
+            </div>
+            <div className="upload-type-card audio">
+              <span className="type-icon">🎵</span>
+              <div className="type-title">Audio</div>
+              <div className="type-desc">MP3, WAV, M4A</div>
+            </div>
+            <div className="upload-type-card video">
+              <span className="type-icon">🎬</span>
+              <div className="type-title">Videos</div>
+              <div className="type-desc">MP4, MOV, AVI</div>
+            </div>
+          </div>
           <div
             className="upload-drop-area"
             onDrop={handleDrop}
@@ -174,23 +190,7 @@ const UploadPage = () => {
           )}
           {success && <div className="upload-success-msg">✅ Upload successful!</div>}
 
-          <div className="upload-types-row">
-            <div className="upload-type-card image">
-              <span className="type-icon">📷</span>
-              <div className="type-title">Images</div>
-              <div className="type-desc">JPG, PNG, HEIC</div>
-            </div>
-            <div className="upload-type-card audio">
-              <span className="type-icon">🎵</span>
-              <div className="type-title">Audio</div>
-              <div className="type-desc">MP3, WAV, M4A</div>
-            </div>
-            <div className="upload-type-card video">
-              <span className="type-icon">🎬</span>
-              <div className="type-title">Videos</div>
-              <div className="type-desc">MP4, MOV, AVI</div>
-            </div>
-          </div>
+          
           <button
             className="upload-btn"
             disabled={files.length === 0 || uploading}
