@@ -90,6 +90,99 @@ const BrowsePage = () => {
   const [deleteUrls, setDeleteUrls] = useState('');
   const [deleteResult, setDeleteResult] = useState('');
 
+  // --- Query 1 API Integration ---
+  const [paged, setPaged] = useState<any[]>([]);
+  const [q1Loading, setQ1Loading] = useState(false);
+  const [q1Error, setQ1Error] = useState('');
+  const totalFiles = paged.length;
+  const totalPages = Math.ceil(totalFiles / PAGE_SIZE);
+
+  // Helper to build query string for multi-species/count
+  const buildQ1QueryString = () => {
+    const speciesEntries = Object.entries(speciesFilters);
+    if (speciesEntries.length === 1 && speciesEntries[0][1] === 1) {
+      // Single species, count=1: use ?species=Name
+      return `?species=${encodeURIComponent(speciesEntries[0][0])}`;
+    }
+    // Multi-species or any with count > 1
+    return speciesEntries
+      .map(([sp, count], idx) => `tag${idx + 1}=${encodeURIComponent(sp)}&count${idx + 1}=${count}`)
+      .join('&')
+      ? '?' + speciesEntries
+      .map(([sp, count], idx) => `tag${idx + 1}=${encodeURIComponent(sp)}&count${idx + 1}=${count}`)
+      .join('&')
+      : '';
+  };
+
+  // Add species for Query 1 (with Enter key support)
+  const addSpecies = () => {
+    if (speciesInput && !speciesFilters[speciesInput]) {
+      setSpeciesFilters({ ...speciesFilters, [speciesInput]: speciesCount });
+      setSpeciesInput('');
+      setSpeciesCount(1);
+    }
+  };
+
+  // Query 1: Search by Bird Species Tags (API call)
+  const handleQ1Search = async () => {
+    // Auto-add input if not empty
+    if (speciesInput && !speciesFilters[speciesInput]) {
+      setSpeciesFilters(prev => {
+        const updated = { ...prev, [speciesInput]: speciesCount };
+        setSpeciesInput('');
+        setSpeciesCount(1);
+        return updated;
+      });
+      setTimeout(handleQ1Search, 0);
+      return;
+    }
+    if (Object.keys(speciesFilters).length === 0) return;
+    setQ1Loading(true);
+    setQ1Error('');
+    setPage(1);
+    try {
+      const queryString = buildQ1QueryString();
+      const url = `https://uwxthsjzpg.execute-api.us-east-1.amazonaws.com/prod/search${queryString}`;
+      console.log('Calling API:', url);
+      const token = sessionStorage.getItem('idToken');
+      const res = await fetch(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      if (!res.ok) throw new Error(`API error: ${res.status}`);
+      const data = await res.json();
+      if (!data.links) throw new Error('Malformed response');
+      const results = data.links.map((item, idx) => ({
+        id: idx + 1,
+        type: item.thumbURL ? 'image' : (item.fileURL.endsWith('.mp4') ? 'video' : 'audio'),
+        url: item.thumbURL || item.fileURL,
+        filename: item.fileURL.split('/').pop() || '',
+        species: {},
+        uploader: '',
+        date: '',
+        fileURL: item.fileURL,
+        thumbURL: item.thumbURL
+      }));
+      setPaged(results);
+    } catch (err) {
+      setQ1Error(err instanceof Error ? err.message : String(err));
+      setPaged([]);
+    } finally {
+      setQ1Loading(false);
+    }
+  };
+
+  // Clear filters for Query 1
+  const clearFilters = () => {
+    setSpeciesFilters({});
+    setFileType('All');
+    setThumbnailUrl('');
+    setMinCount(1);
+    setSearchFile(null);
+    setPage(1);
+    setPaged([]);
+    setQ1Error('');
+  };
+
   // Filtering logic (simulate backend query)
   let filtered = mockMedia.filter(item => {
     // File type filter
@@ -118,11 +211,6 @@ const BrowsePage = () => {
     return 0;
   });
 
-  // Pagination
-  const totalFiles = filtered.length;
-  const totalPages = Math.ceil(totalFiles / PAGE_SIZE);
-  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-
   // Bulk selection
   const allSelected = paged.length > 0 && paged.every(item => selected.includes(item.id));
   const toggleSelectAll = () => {
@@ -137,13 +225,6 @@ const BrowsePage = () => {
   };
 
   // Species filter add/remove
-  const addSpecies = () => {
-    if (speciesInput && !speciesFilters[speciesInput]) {
-      setSpeciesFilters({ ...speciesFilters, [speciesInput]: speciesCount });
-      setSpeciesInput('');
-      setSpeciesCount(1);
-    }
-  };
   const removeSpecies = (sp: string) => {
     const copy = { ...speciesFilters };
     delete copy[sp];
@@ -179,16 +260,6 @@ const BrowsePage = () => {
 
   // Grid/List toggle
   const handleViewMode = (mode: 'grid' | 'list') => setViewMode(mode);
-
-  // Clear filters
-  const clearFilters = () => {
-    setSpeciesFilters({});
-    setFileType('All');
-    setThumbnailUrl('');
-    setMinCount(1);
-    setSearchFile(null);
-    setPage(1);
-  };
 
   const handleLogout = () => {
     sessionStorage.clear();
@@ -227,13 +298,60 @@ const BrowsePage = () => {
     showToast('Showing mock similar bird results.', 'info');
   };
 
-  const handleSearchSpeciesOnly = () => {
-    // Filter files that contain at least one of each specified species
-    const results = mockMedia.filter(item => {
-      if (!item.species) return false;
-      return speciesFilters2.every(sp => item.species[sp] && item.species[sp] > 0);
-    });
-    setPaged2(results);
+  // Search logic for Query 2
+  const handleSearchSpeciesOnly = async () => {
+    if (speciesFilters2.length === 0) return;
+    
+    try {
+      // Build query string with just species names, no counts
+      const queryString = speciesFilters2
+        .map((sp, idx) => `tag${idx + 1}=${encodeURIComponent(sp)}&count${idx + 1}=1`)
+        .join('&');
+      
+      const url = `https://uwxthsjzpg.execute-api.us-east-1.amazonaws.com/prod/search?${queryString}`;
+      console.log('Calling API:', url);
+      
+      const token = sessionStorage.getItem('idToken');
+      const res = await fetch(url, {
+        method: 'GET',
+        mode: 'cors',
+        headers: token ? { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        } : {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error('API Error:', errorData);
+        throw new Error(errorData.error || `API error: ${res.status}`);
+      }
+      
+      const data = await res.json();
+      console.log('API Response:', data);
+      
+      if (!data.links) throw new Error('Malformed response');
+      
+      const results = data.links.map((item, idx) => ({
+        id: idx + 1,
+        type: item.thumbURL ? 'image' : (item.fileURL.endsWith('.mp4') ? 'video' : 'audio'),
+        url: item.thumbURL || item.fileURL,
+        filename: item.fileURL.split('/').pop() || '',
+        species: {},
+        uploader: '',
+        date: '',
+        fileURL: item.fileURL,
+        thumbURL: item.thumbURL
+      }));
+      
+      setPaged2(results);
+    } catch (err) {
+      console.error('Error:', err);
+      showToast(err instanceof Error ? err.message : 'Failed to search species', 'error');
+      setPaged2([]);
+    }
   };
 
   // Add species for Query 2
@@ -258,16 +376,42 @@ const BrowsePage = () => {
   };
 
   // Search logic for Query 3
-  const handleSearchThumbnail = () => {
-    // Simulate finding the full-size image by thumbnail URL
-    // In a real app, this would call the backend
-    const found = mockMedia.find(item => item.url.includes(thumbnailInput));
-    if (found && found.type === 'image') {
-      setThumbnailResult({
-        thumb: found.url,
-        full: found.url.replace('-thumb', '') // Simulate full-size URL
+  const handleSearchThumbnail = async () => {
+    if (!thumbnailInput) return;
+    
+    try {
+      const encodedUrl = encodeURIComponent(thumbnailInput);
+      const url = `https://uwxthsjzpg.execute-api.us-east-1.amazonaws.com/prod/fullsize?thumbURL=${encodedUrl}`;
+      console.log('Input URL:', thumbnailInput);
+      console.log('Encoded URL:', encodedUrl);
+      console.log('Full API URL:', url);
+      const token = sessionStorage.getItem('idToken');
+      const res = await fetch(url, {
+        method: 'GET',
+        mode: 'cors',
+        headers: token ? { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        } : {
+          'Content-Type': 'application/json'
+        }
       });
-    } else {
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error('API Error:', errorData);
+        throw new Error(errorData.error || `API error: ${res.status}`);
+      }
+      
+      const data = await res.json();
+      console.log('API Response:', data);
+      setThumbnailResult({
+        thumb: thumbnailInput,
+        full: data.fileURL
+      });
+    } catch (err) {
+      console.error('Error:', err);
+      showToast(err instanceof Error ? err.message : 'Failed to find full-size image', 'error');
       setThumbnailResult(null);
     }
   };
@@ -327,16 +471,43 @@ const BrowsePage = () => {
     setBulkResult('');
   };
 
-  const handleBulkSubmit = () => {
-    // Mock API call
+  const handleBulkSubmit = async () => {
     if (!bulkUrls || bulkTags.length === 0) {
       setBulkResult('Please provide file URLs and at least one tag.');
       return;
     }
     const urlList = bulkUrls.split(/\s|,/).map(u => u.trim()).filter(Boolean);
-    setBulkResult(
-      `Operation: ${bulkOperation === 1 ? 'Add' : 'Remove'}\nURLs: ${urlList.join(', ')}\nTags: ${bulkTags.join(', ')}`
-    );
+    setBulkResult('');
+    try {
+      const token = sessionStorage.getItem('idToken');
+      const res = await fetch('https://uwxthsjzpg.execute-api.us-east-1.amazonaws.com/prod/manage-tags', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          urls: urlList,
+          operation: bulkOperation,
+          tags: bulkTags
+        })
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        setBulkResult(`API error: ${res.status} ${errorData.error || ''}`);
+        return;
+      }
+      const data = await res.json();
+      if (!data.updated) {
+        setBulkResult('Malformed response from server.');
+        return;
+      }
+      // Format the result for display
+      const resultText = data.updated.map((item: any) => `${item.url}: ${item.status}`).join('\n');
+      setBulkResult(resultText);
+    } catch (err) {
+      setBulkResult('Failed to update tags.');
+    }
   };
 
   const handleBulkDeleteFiles = () => {
@@ -398,6 +569,7 @@ const BrowsePage = () => {
                   onChange={e => setSpeciesInput(e.target.value)}
                   placeholder="Enter species name"
                   className="species-input"
+                  onKeyDown={e => { if (e.key === 'Enter') addSpecies(); }}
                 />
                 <input 
                   type="number" 
@@ -407,7 +579,7 @@ const BrowsePage = () => {
                   placeholder="Count"
                 />
                 <button onClick={addSpecies} disabled={!speciesInput} className="add-btn">ADD</button>
-                <button className="search-btn" onClick={() => setPage(1)}>SEARCH</button>
+                <button className="search-btn" onClick={handleQ1Search} disabled={Object.keys(speciesFilters).length === 0 && !speciesInput}>SEARCH</button>
                 <button className="clear-btn" onClick={clearFilters}>CLEAR</button>
               </div>
               <div className="species-chips">
@@ -424,6 +596,9 @@ const BrowsePage = () => {
           {/* Results Section for Query 1 */}
           <div className="query-results">
             <h4>Search Results</h4>
+            {(!q1Loading && paged.length === 0 && !q1Error) && (
+              <div style={{ color: '#888', margin: '20px 0' }}>No results found.</div>
+            )}
             <div className={viewMode === 'grid' ? 'gallery-grid' : 'gallery-list'}>
               {paged.map(item => (
                 <div className={viewMode === 'grid' ? 'gallery-card' : 'gallery-list-item'} key={item.id}>
@@ -761,6 +936,7 @@ const BrowsePage = () => {
                 <button className="search-btn" style={{ backgroundColor: '#dc3545' }} onClick={handleBulkDeleteFiles}>DELETE</button>
                 <button className="clear-btn" onClick={clearBulkDelete}>CLEAR</button>
               </div>
+
             </div>
             <div className="query-results">
               <h4>Result</h4>
