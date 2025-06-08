@@ -74,6 +74,21 @@ const BrowsePage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [similarResults, setSimilarResults] = useState<any[]>([]);
   const [showSimilar, setShowSimilar] = useState(false);
+  const [speciesInput2, setSpeciesInput2] = useState('');
+  const [speciesFilters2, setSpeciesFilters2] = useState<string[]>([]);
+  const [paged2, setPaged2] = useState<any[]>([]);
+  const [thumbnailInput, setThumbnailInput] = useState('');
+  const [thumbnailResult, setThumbnailResult] = useState<any | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [discoveredTags, setDiscoveredTags] = useState<string[]>([]);
+  const [query4Results, setQuery4Results] = useState<any[]>([]);
+  const [bulkUrls, setBulkUrls] = useState('');
+  const [bulkOperation, setBulkOperation] = useState(1); // 1 for add, 0 for remove
+  const [bulkTagInput, setBulkTagInput] = useState('');
+  const [bulkTags, setBulkTags] = useState<string[]>([]);
+  const [bulkResult, setBulkResult] = useState<string>('');
+  const [deleteUrls, setDeleteUrls] = useState('');
+  const [deleteResult, setDeleteResult] = useState('');
 
   // Filtering logic (simulate backend query)
   let filtered = mockMedia.filter(item => {
@@ -212,6 +227,133 @@ const BrowsePage = () => {
     showToast('Showing mock similar bird results.', 'info');
   };
 
+  const handleSearchSpeciesOnly = () => {
+    // Filter files that contain at least one of each specified species
+    const results = mockMedia.filter(item => {
+      if (!item.species) return false;
+      return speciesFilters2.every(sp => item.species[sp] && item.species[sp] > 0);
+    });
+    setPaged2(results);
+  };
+
+  // Add species for Query 2
+  const addSpecies2 = () => {
+    const sp = speciesInput2.trim();
+    if (sp && !speciesFilters2.includes(sp)) {
+      setSpeciesFilters2([...speciesFilters2, sp]);
+    }
+    setSpeciesInput2('');
+  };
+
+  // Remove species for Query 2
+  const removeSpecies2 = (sp: string) => {
+    setSpeciesFilters2(speciesFilters2.filter(s => s !== sp));
+  };
+
+  // Clear Query 2 filters
+  const clearFilters2 = () => {
+    setSpeciesInput2('');
+    setSpeciesFilters2([]);
+    setPaged2([]);
+  };
+
+  // Search logic for Query 3
+  const handleSearchThumbnail = () => {
+    // Simulate finding the full-size image by thumbnail URL
+    // In a real app, this would call the backend
+    const found = mockMedia.find(item => item.url.includes(thumbnailInput));
+    if (found && found.type === 'image') {
+      setThumbnailResult({
+        thumb: found.url,
+        full: found.url.replace('-thumb', '') // Simulate full-size URL
+      });
+    } else {
+      setThumbnailResult(null);
+    }
+  };
+
+  const clearThumbnailSearch = () => {
+    setThumbnailInput('');
+    setThumbnailResult(null);
+  };
+
+  // Mock tag discovery for uploaded file
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setUploadedFile(file);
+    if (file) {
+      // Mock: randomly pick 1-2 species from SPECIES_LIST
+      const allSpecies = Object.keys(mockMedia.reduce((acc, item) => ({ ...acc, ...item.species }), {}));
+      const randomTags = allSpecies.sort(() => 0.5 - Math.random()).slice(0, Math.floor(Math.random() * 2) + 1);
+      setDiscoveredTags(randomTags);
+    } else {
+      setDiscoveredTags([]);
+    }
+    setQuery4Results([]);
+  };
+
+  // Search logic for Query 4
+  const handleSearchByFileTags = () => {
+    if (discoveredTags.length === 0) return;
+    const results = mockMedia.filter(item =>
+      discoveredTags.every(tag => item.species && item.species[tag] && item.species[tag] > 0)
+    );
+    setQuery4Results(results);
+  };
+
+  const clearQuery4 = () => {
+    setUploadedFile(null);
+    setDiscoveredTags([]);
+    setQuery4Results([]);
+  };
+
+  const addBulkTag = () => {
+    const tag = bulkTagInput.trim();
+    if (tag && !bulkTags.includes(tag)) {
+      setBulkTags([...bulkTags, tag]);
+    }
+    setBulkTagInput('');
+  };
+
+  const removeBulkTag = (tag: string) => {
+    setBulkTags(bulkTags.filter(t => t !== tag));
+  };
+
+  const clearBulk = () => {
+    setBulkUrls('');
+    setBulkOperation(1);
+    setBulkTagInput('');
+    setBulkTags([]);
+    setBulkResult('');
+  };
+
+  const handleBulkSubmit = () => {
+    // Mock API call
+    if (!bulkUrls || bulkTags.length === 0) {
+      setBulkResult('Please provide file URLs and at least one tag.');
+      return;
+    }
+    const urlList = bulkUrls.split(/\s|,/).map(u => u.trim()).filter(Boolean);
+    setBulkResult(
+      `Operation: ${bulkOperation === 1 ? 'Add' : 'Remove'}\nURLs: ${urlList.join(', ')}\nTags: ${bulkTags.join(', ')}`
+    );
+  };
+
+  const handleBulkDeleteFiles = () => {
+    if (!deleteUrls.trim()) {
+      setDeleteResult('Please provide at least one file URL.');
+      return;
+    }
+    const urlList = deleteUrls.split(/\s|,/).map(u => u.trim()).filter(Boolean);
+    setDeleteResult(`Deleted files: ${urlList.join(', ')}`);
+    // In a real app, call the backend API to delete files and their thumbnails
+  };
+
+  const clearBulkDelete = () => {
+    setDeleteUrls('');
+    setDeleteResult('');
+  };
+
   return (
     <div className="home-container">
       <nav className="top-nav">
@@ -241,54 +383,403 @@ const BrowsePage = () => {
 
         {/* Search & Filters Panel */}
         <div className="search-panel">
-          <div className="search-row">
-            <label>🔍 Search by Species:</label>
-            <select value={speciesInput} onChange={e => setSpeciesInput(e.target.value)}>
-              <option value="">Select species</option>
-              {SPECIES_LIST.map(sp => (
-                <option value={sp} key={sp}>{sp}</option>
-              ))}
-            </select>
-            <input type="number" min={1} value={speciesCount} onChange={e => setSpeciesCount(Number(e.target.value))} />
-            <button onClick={addSpecies} disabled={!speciesInput} className="add-btn">ADD</button>
-            <div className="species-chips">
-              {Object.entries(speciesFilters).map(([sp, count]) => (
-                <span className="species-chip" key={sp}>{sp}: {count} <button onClick={() => removeSpecies(sp)} title="Remove">×</button></span>
+          {/* Query 1: Tag-based Search Section */}
+          <div className="query-section">
+            <h3 className="query-title">Query 1: Search by Bird Species Tags</h3>
+            <div className="query-description">
+              Search for images and videos containing specific bird species with minimum counts.
+              Example: {'{"crow": 3}'} or {'{"pigeon": 2, "crow": 1}'}
+            </div>
+            <div className="search-row">
+              <div className="species-input-group">
+                <input 
+                  type="text"
+                  value={speciesInput}
+                  onChange={e => setSpeciesInput(e.target.value)}
+                  placeholder="Enter species name"
+                  className="species-input"
+                />
+                <input 
+                  type="number" 
+                  min={0} 
+                  value={speciesCount} 
+                  onChange={e => setSpeciesCount(Number(e.target.value))} 
+                  placeholder="Count"
+                />
+                <button onClick={addSpecies} disabled={!speciesInput} className="add-btn">ADD</button>
+                <button className="search-btn" onClick={() => setPage(1)}>SEARCH</button>
+                <button className="clear-btn" onClick={clearFilters}>CLEAR</button>
+              </div>
+              <div className="species-chips">
+                {Object.entries(speciesFilters).map(([sp, count]) => (
+                  <span className="species-chip" key={sp}>
+                    {sp}: {count} 
+                    <button onClick={() => removeSpecies(sp)} title="Remove">×</button>
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Results Section for Query 1 */}
+          <div className="query-results">
+            <h4>Search Results</h4>
+            <div className={viewMode === 'grid' ? 'gallery-grid' : 'gallery-list'}>
+              {paged.map(item => (
+                <div className={viewMode === 'grid' ? 'gallery-card' : 'gallery-list-item'} key={item.id}>
+                  <input type="checkbox" checked={selected.includes(item.id)} onChange={() => toggleSelect(item.id)} />
+                  {/* Download icon with label in top right for audio/video */}
+                  {item.type !== 'image' && item.url && (
+                    <a
+                      href={item.url}
+                      download={item.filename}
+                      className="download-icon-link"
+                      title="Download"
+                    >
+                      <span className="download-svg" aria-label="download">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="12" y1="5" x2="12" y2="17" />
+                          <polyline points="19 12 12 19 5 12" />
+                          <path d="M5 19h14" />
+                        </svg>
+                      </span>
+                      <span className="download-label">Download</span>
+                    </a>
+                  )}
+                  <div className="gallery-thumb" onClick={() => handleView(item)} style={{ cursor: 'pointer' }}>
+                    {item.type === 'image' ? (
+                      <img src={item.url} alt={item.filename} />
+                    ) : item.type === 'audio' ? (
+                      <span className="gallery-icon" role="img" aria-label="audio">🎵</span>
+                    ) : item.type === 'video' ? (
+                      <span className="gallery-icon" role="img" aria-label="video">🎬</span>
+                    ) : null}
+                  </div>
+                  <div className="gallery-info">
+                    <div className="gallery-filename">{item.filename}</div>
+                    <div className="gallery-species-tags">
+                      {item.species && Object.entries(item.species).map(([sp, count]) => {
+                        const c = count as number;
+                        return (
+                          <span className="gallery-tag" key={sp}>{c} {sp}{c > 1 ? 's' : ''}</span>
+                        );
+                      })}
+                    </div>
+                    <div className="gallery-meta">
+                      <span>By {item.uploader}</span> | <span>{item.date}</span>
+                    </div>
+                    <div className="gallery-actions">
+                      <button onClick={() => handleView(item)}>VIEW</button>
+                      <button onClick={() => handleEditTags(item)}>EDIT TAGS</button>
+                      <button onClick={() => handleDelete(item)} style={{ backgroundColor: '#dc3545', color: 'white' }}>DELETE</button>
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
-          <div className="search-row">
-            <label>📊 Minimum Count:</label>
-            <input type="number" min={1} value={minCount} onChange={e => setMinCount(Number(e.target.value))} />
-            <label>📁 File Type:</label>
-            <select value={fileType} onChange={e => setFileType(e.target.value)}>
-              {FILE_TYPES.map(type => <option value={type} key={type}>{type}</option>)}
-            </select>
-            <label>🔗 Thumbnail URL:</label>
-            <input type="text" value={thumbnailUrl} onChange={e => setThumbnailUrl(e.target.value)} placeholder="Enter URL or filename" />
+
+          {/* Placeholder for other queries */}
+          <div className="query-section">
+            <h3 className="query-title">Query 2: Search by Bird Species (No Count)</h3>
+            <div className="query-description">
+              Find all images, audios, and videos that contain at least one of each specified bird species. Example: {'{"crow"}'}
+            </div>
+            <div className="search-row">
+              <div className="species-input-group">
+                <input
+                  type="text"
+                  value={speciesInput2}
+                  onChange={e => setSpeciesInput2(e.target.value)}
+                  placeholder="Enter species name"
+                  className="species-input"
+                  onKeyDown={e => { if (e.key === 'Enter') addSpecies2(); }}
+                />
+                <button onClick={addSpecies2} disabled={!speciesInput2} className="add-btn">ADD</button>
+                <button className="search-btn" onClick={handleSearchSpeciesOnly} disabled={speciesFilters2.length === 0}>SEARCH</button>
+                <button className="clear-btn" onClick={clearFilters2}>CLEAR</button>
+              </div>
+              <div className="species-chips">
+                {speciesFilters2.map(sp => (
+                  <span className="species-chip" key={sp}>
+                    {sp}
+                    <button onClick={() => removeSpecies2(sp)} title="Remove">×</button>
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="query-results">
+              <h4>Search Results</h4>
+              <div className={viewMode === 'grid' ? 'gallery-grid' : 'gallery-list'}>
+                {paged2.map(item => (
+                  <div className={viewMode === 'grid' ? 'gallery-card' : 'gallery-list-item'} key={item.id}>
+                    <input type="checkbox" checked={selected.includes(item.id)} onChange={() => toggleSelect(item.id)} />
+                    {item.type !== 'image' && item.url && (
+                      <a
+                        href={item.url}
+                        download={item.filename}
+                        className="download-icon-link"
+                        title="Download"
+                      >
+                        <span className="download-svg" aria-label="download">
+                          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="17" />
+                            <polyline points="19 12 12 19 5 12" />
+                            <path d="M5 19h14" />
+                          </svg>
+                        </span>
+                        <span className="download-label">Download</span>
+                      </a>
+                    )}
+                    <div className="gallery-thumb" onClick={() => handleView(item)} style={{ cursor: 'pointer' }}>
+                      {item.type === 'image' ? (
+                        <img src={item.url} alt={item.filename} />
+                      ) : item.type === 'audio' ? (
+                        <span className="gallery-icon" role="img" aria-label="audio">🎵</span>
+                      ) : item.type === 'video' ? (
+                        <span className="gallery-icon" role="img" aria-label="video">🎬</span>
+                      ) : null}
+                    </div>
+                    <div className="gallery-info">
+                      <div className="gallery-filename">{item.filename}</div>
+                      <div className="gallery-species-tags">
+                        {item.species && Object.entries(item.species).map(([sp, count]) => {
+                          const c = count as number;
+                          return (
+                            <span className="gallery-tag" key={sp}>{c} {sp}{c > 1 ? 's' : ''}</span>
+                          );
+                        })}
+                      </div>
+                      <div className="gallery-meta">
+                        <span>By {item.uploader}</span> | <span>{item.date}</span>
+                      </div>
+                      <div className="gallery-actions">
+                        <button onClick={() => handleView(item)}>VIEW</button>
+                        <button onClick={() => handleEditTags(item)}>EDIT TAGS</button>
+                        <button onClick={() => handleDelete(item)} style={{ backgroundColor: '#dc3545', color: 'white' }}>DELETE</button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-          <div className="search-row">
-            <label>📋 Upload file to find similar:</label>
-            <input type="file" onChange={e => setSearchFile(e.target.files?.[0] || null)} />
+
+          {/* Query 3: Find Full-size Image by Thumbnail URL */}
+          <div className="query-section">
+            <h3 className="query-title">Query 3: Find Full-size Image by Thumbnail URL</h3>
+            <div className="query-description">
+              Enter the S3 URL of a thumbnail to find the corresponding full-size image S3 URL.
+            </div>
+            <div className="search-row">
+              <div className="species-input-group">
+                <input
+                  type="text"
+                  value={thumbnailInput}
+                  onChange={e => setThumbnailInput(e.target.value)}
+                  placeholder="Enter thumbnail S3 URL or part of it"
+                  className="species-input"
+                  style={{ minWidth: '350px' }}
+                />
+                <button className="search-btn" onClick={handleSearchThumbnail} disabled={!thumbnailInput}>SEARCH</button>
+                <button className="clear-btn" onClick={clearThumbnailSearch}>CLEAR</button>
+              </div>
+            </div>
+            <div className="query-results">
+              <h4>Result</h4>
+              {thumbnailResult ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                  <img src={thumbnailResult.thumb} alt="Thumbnail" style={{ maxWidth: '120px', borderRadius: '8px', border: '1px solid #ccc' }} />
+                  <div>
+                    <div>Full-size Image URL:</div>
+                    <a href={thumbnailResult.full} target="_blank" rel="noopener noreferrer">{thumbnailResult.full}</a>
+                  </div>
+                </div>
+              ) : (
+                thumbnailInput && <div>No matching image found.</div>
+              )}
+            </div>
           </div>
-          <div className="button-row">
-            <button className="stub-btn" onClick={handleFindSimilar}>FIND SIMILAR (STUB)</button>
-            <button className="clear-btn" onClick={clearFilters}>CLEAR FILTERS</button>
-            <button className="search-btn" onClick={() => setPage(1)}>SEARCH</button>
+
+          {/* Query 4: Find Files by Uploaded File's Tags */}
+          <div className="query-section">
+            <h3 className="query-title">Query 4: Find Files by Uploaded File's Tags</h3>
+            <div className="query-description">
+              Upload a file (image/audio/video). The system will discover the tags (bird species) in the file and find all files containing those tags. The uploaded file is not stored.
+            </div>
+            <div className="search-row">
+              <div className="species-input-group">
+                <input type="file" onChange={handleFileUpload} />
+                <button className="search-btn" onClick={handleSearchByFileTags} disabled={!uploadedFile || discoveredTags.length === 0}>SEARCH</button>
+                <button className="clear-btn" onClick={clearQuery4}>CLEAR</button>
+              </div>
+            </div>
+            {uploadedFile && (
+              <div style={{ margin: '10px 0' }}>
+                <strong>Discovered tags:</strong> {discoveredTags.length > 0 ? discoveredTags.join(', ') : 'None'}
+              </div>
+            )}
+            <div className="query-results">
+              <h4>Search Results</h4>
+              <div className={viewMode === 'grid' ? 'gallery-grid' : 'gallery-list'}>
+                {query4Results.map(item => (
+                  <div className={viewMode === 'grid' ? 'gallery-card' : 'gallery-list-item'} key={item.id}>
+                    <input type="checkbox" checked={selected.includes(item.id)} onChange={() => toggleSelect(item.id)} />
+                    {item.type !== 'image' && item.url && (
+                      <a
+                        href={item.url}
+                        download={item.filename}
+                        className="download-icon-link"
+                        title="Download"
+                      >
+                        <span className="download-svg" aria-label="download">
+                          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="17" />
+                            <polyline points="19 12 12 19 5 12" />
+                            <path d="M5 19h14" />
+                          </svg>
+                        </span>
+                        <span className="download-label">Download</span>
+                      </a>
+                    )}
+                    <div className="gallery-thumb" onClick={() => handleView(item)} style={{ cursor: 'pointer' }}>
+                      {item.type === 'image' ? (
+                        <img src={item.url} alt={item.filename} />
+                      ) : item.type === 'audio' ? (
+                        <span className="gallery-icon" role="img" aria-label="audio">🎵</span>
+                      ) : item.type === 'video' ? (
+                        <span className="gallery-icon" role="img" aria-label="video">🎬</span>
+                      ) : null}
+                    </div>
+                    <div className="gallery-info">
+                      <div className="gallery-filename">{item.filename}</div>
+                      <div className="gallery-species-tags">
+                        {item.species && Object.entries(item.species).map(([sp, count]) => {
+                          const c = count as number;
+                          return (
+                            <span className="gallery-tag" key={sp}>{c} {sp}{c > 1 ? 's' : ''}</span>
+                          );
+                        })}
+                      </div>
+                      <div className="gallery-meta">
+                        <span>By {item.uploader}</span> | <span>{item.date}</span>
+                      </div>
+                      <div className="gallery-actions">
+                        <button onClick={() => handleView(item)}>VIEW</button>
+                        <button onClick={() => handleEditTags(item)}>EDIT TAGS</button>
+                        <button onClick={() => handleDelete(item)} style={{ backgroundColor: '#dc3545', color: 'white' }}>DELETE</button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Query 5: Bulk Add/Remove Tags */}
+          <div className="query-section">
+            <h3 className="query-title">Query 5: Bulk Add/Remove Tags</h3>
+            <div className="query-description">
+              Enter a list of file URLs, select add or remove, and specify tags with counts (e.g., "crow,1").
+            </div>
+            <div className="search-row" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+              <textarea
+                value={bulkUrls}
+                onChange={e => setBulkUrls(e.target.value)}
+                placeholder="Enter file URLs (one per line or comma-separated)"
+                rows={3}
+                style={{ width: '100%', minWidth: '350px', marginBottom: '10px', resize: 'vertical' }}
+              />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '10px' }}>
+                <label>
+                  <input
+                    type="radio"
+                    name="bulk-operation"
+                    value={1}
+                    checked={bulkOperation === 1}
+                    onChange={() => setBulkOperation(1)}
+                  />{' '}
+                  Add
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="bulk-operation"
+                    value={0}
+                    checked={bulkOperation === 0}
+                    onChange={() => setBulkOperation(0)}
+                  />{' '}
+                  Remove
+                </label>
+              </div>
+              <div className="species-input-group">
+                <input
+                  type="text"
+                  value={bulkTagInput}
+                  onChange={e => setBulkTagInput(e.target.value)}
+                  placeholder="Enter tag,count (e.g., crow,1)"
+                  className="species-input"
+                  onKeyDown={e => { if (e.key === 'Enter') addBulkTag(); }}
+                />
+                <button onClick={addBulkTag} disabled={!bulkTagInput} className="add-btn">ADD</button>
+                <button className="clear-btn" onClick={() => setBulkTags([])} disabled={bulkTags.length === 0}>CLEAR TAGS</button>
+              </div>
+              <div className="species-chips">
+                {bulkTags.map(tag => (
+                  <span className="species-chip" key={tag}>
+                    {tag}
+                    <button onClick={() => removeBulkTag(tag)} title="Remove">×</button>
+                  </span>
+                ))}
+              </div>
+              <div className="button-row" style={{ marginTop: '15px' }}>
+                <button className="search-btn" onClick={handleBulkSubmit}>SUBMIT</button>
+                <button className="clear-btn" onClick={clearBulk}>CLEAR ALL</button>
+              </div>
+            </div>
+            <div className="query-results">
+              <h4>Result</h4>
+              <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{bulkResult}</pre>
+            </div>
+          </div>
+
+          {/* Query 6: Delete Files */}
+          <div className="query-section">
+            <h3 className="query-title">Query 6: Delete Files</h3>
+            <div className="query-description">
+              Enter a list of file URLs to delete them (and their thumbnails, if images). You can also delete files individually using the DELETE button on each card.
+            </div>
+            <div className="search-row" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+              <textarea
+                value={deleteUrls}
+                onChange={e => setDeleteUrls(e.target.value)}
+                placeholder="Enter file URLs to delete (one per line or comma-separated)"
+                rows={3}
+                style={{ width: '100%', minWidth: '350px', marginBottom: '10px', resize: 'vertical' }}
+              />
+              <div className="button-row">
+                <button className="search-btn" style={{ backgroundColor: '#dc3545' }} onClick={handleBulkDeleteFiles}>DELETE</button>
+                <button className="clear-btn" onClick={clearBulkDelete}>CLEAR</button>
+              </div>
+            </div>
+            <div className="query-results">
+              <h4>Result</h4>
+              <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{deleteResult}</pre>
+            </div>
           </div>
         </div>
 
         {/* Results Summary & Sorting */}
-        <div className="results-summary">
+        {/* <div className="results-summary">
           <span>Showing {paged.length} of {totalFiles} files</span>
           <span> | Sort by: </span>
           <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
             {SORT_OPTIONS.map(opt => <option value={opt} key={opt}>{opt}</option>)}
           </select>
-        </div>
+        </div> */}
 
         {/* Bulk Actions Bar */}
-        <div className="bulk-actions-bar">
+        {/* <div className="bulk-actions-bar">
           <div className="bulk-left">
             <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} id="selectAll" />
             <label htmlFor="selectAll">Select All</label>
@@ -299,67 +790,6 @@ const BrowsePage = () => {
             <button onClick={handleBulkDelete} disabled={selected.length === 0}>DELETE</button>
             <button onClick={handleBulkTag} disabled={selected.length === 0}>TAG</button>
           </div>
-        </div>
-
-        {/* Media Grid/List */}
-        <div className={viewMode === 'grid' ? 'gallery-grid' : 'gallery-list'}>
-          {paged.map(item => (
-            <div className={viewMode === 'grid' ? 'gallery-card' : 'gallery-list-item'} key={item.id}>
-              <input type="checkbox" checked={selected.includes(item.id)} onChange={() => toggleSelect(item.id)} />
-              {/* Download icon with label in top right for audio/video */}
-              {item.type !== 'image' && item.url && (
-                <a
-                  href={item.url}
-                  download={item.filename}
-                  className="download-icon-link"
-                  title="Download"
-                >
-                  <span className="download-svg" aria-label="download">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="12" y1="5" x2="12" y2="17" />
-                      <polyline points="19 12 12 19 5 12" />
-                      <path d="M5 19h14" />
-                    </svg>
-                  </span>
-                  <span className="download-label">Download</span>
-                </a>
-              )}
-              <div className="gallery-thumb" onClick={() => handleView(item)} style={{ cursor: 'pointer' }}>
-                {item.type === 'image' ? (
-                  <img src={item.url} alt={item.filename} />
-                ) : item.type === 'audio' ? (
-                  <span className="gallery-icon" role="img" aria-label="audio">🎵</span>
-                ) : item.type === 'video' ? (
-                  <span className="gallery-icon" role="img" aria-label="video">🎬</span>
-                ) : null}
-              </div>
-              <div className="gallery-info">
-                <div className="gallery-filename">{item.filename}</div>
-                <div className="gallery-species-tags">
-                  {item.species && Object.entries(item.species).map(([sp, count]) => (
-                    <span className="gallery-tag" key={sp}>{count} {sp}{count > 1 ? 's' : ''}</span>
-                  ))}
-                </div>
-                <div className="gallery-meta">
-                  <span>By {item.uploader}</span> | <span>{item.date}</span>
-                </div>
-                <div className="gallery-actions">
-                  <button onClick={() => handleView(item)}>VIEW</button>
-                  <button onClick={() => handleEditTags(item)}>EDIT TAGS</button>
-                  <button onClick={() => handleDelete(item)}>DELETE</button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Pagination */}
-        {/* <div className="pagination-bar">
-          <button onClick={() => goToPage(page - 1)} disabled={page === 1}>← Previous</button>
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button key={i + 1} onClick={() => goToPage(i + 1)} className={page === i + 1 ? 'active' : ''}>{i + 1}</button>
-          ))}
-          <button onClick={() => goToPage(page + 1)} disabled={page === totalPages}>Next →</button>
         </div> */}
 
         {/* File Details/Preview Modal */}

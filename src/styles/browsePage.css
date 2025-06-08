@@ -183,49 +183,9 @@ body {
 /* Bottom button row styling */
 .button-row {
   display: flex;
-  gap: 1rem;
-  margin-top: 1.2rem;
-  margin-bottom: 0.5rem;
-  justify-content: space-between;
-}
-.button-row button,
-.button-row .stub-btn {
-  flex: 1 1 0;
-  border-radius: 12px;
-  font-size: 1.13rem;
-  font-weight: 700;
-  padding: 1rem 0;
-  margin: 0;
-  text-align: center;
-  transition: background 0.2s;
-  border: none;
-  cursor: pointer;
-}
-.button-row .stub-btn {
-  background: #ccc;
-  color: #fff;
-  cursor: not-allowed;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-}
-.button-row .clear-btn {
-  background: #4CAF50;
-  color: #fff;
-}
-.button-row .clear-btn:hover {
-  background: #388e3c;
-}
-.button-row .search-btn {
-  background: #4CAF50;
-  color: #fff;
-}
-.button-row .search-btn:hover {
-  background: #388e3c;
-}
-
-/* Remove vertical stacking for these buttons if present */
-.button-row > * {
-  margin-bottom: 0 !important;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
 }
 
 .species-chips {
@@ -475,27 +435,55 @@ body {
   }
 }
 
-.add-btn {
-  background: #4CAF50;
-  color: #fff;
+/* Common button styles */
+.add-btn,
+.search-btn,
+.clear-btn {
+  padding: 8px 16px;
   border: none;
-  border-radius: 8px;
-  width: 60px;
-  height: 2.2rem;
-  font-size: 1rem;
-  font-weight: 600;
+  border-radius: 4px;
   cursor: pointer;
-  margin-left: 0.3rem;
-  transition: background 0.2s;
-  box-shadow: 0 1px 4px rgba(44, 62, 80, 0.06);
-  display: flex;
+  font-weight: 500;
+  min-width: 80px;
+  height: 36px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+  box-sizing: border-box;
 }
+
+.add-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.add-btn:hover {
+  background-color: #218838;
+}
+
 .add-btn:disabled {
-  background: #bdbdbd;
+  background-color: #6c757d;
   cursor: not-allowed;
+}
+
+.search-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.search-btn:hover {
+  background-color: #0056b3;
+}
+
+.clear-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.clear-btn:hover {
+  background-color: #c82333;
 }
 
 .download-icon-link {
@@ -600,4 +588,122 @@ body {
   margin-bottom: 0.5rem;
   font-weight: 500;
   box-shadow: 0 1px 4px rgba(44, 62, 80, 0.06);
+}
+
+/* Query Section Styles */
+.query-section {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.query-title {
+  color: #2c3e50;
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.query-description {
+  color: #6c757d;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.species-input-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-wrap: nowrap;
+}
+
+.species-input-group input,
+.species-input-group button {
+  height: 40px !important;
+  font-size: 16px !important;
+  line-height: 40px !important;
+  box-sizing: border-box;
+  vertical-align: middle;
+  margin: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.species-input {
+  min-width: 200px;
+  flex: 1;
+}
+
+.species-input-group input[type="number"] {
+  width: 100px;
+  text-align: center;
+}
+
+.species-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.species-chip {
+  background-color: #e9ecef;
+  padding: 6px 12px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.species-chip button {
+  background: none;
+  border: none;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.species-chip button:hover {
+  color: #dc3545;
+}
+
+.query-results {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.query-results h4 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+}
+
+.video-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.download-video-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.download-video-btn:hover {
+  background-color: #0056b3;
 } 
