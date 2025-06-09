@@ -424,25 +424,116 @@ const BrowsePage = () => {
   // Mock tag discovery for uploaded file
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
-    setUploadedFile(file);
     if (file) {
-      // Mock: randomly pick 1-2 species from SPECIES_LIST
-      const allSpecies = Object.keys(mockMedia.reduce((acc, item) => ({ ...acc, ...item.species }), {}));
-      const randomTags = allSpecies.sort(() => 0.5 - Math.random()).slice(0, Math.floor(Math.random() * 2) + 1);
-      setDiscoveredTags(randomTags);
-    } else {
-      setDiscoveredTags([]);
+      console.log('File selected:', file.name, 'Type:', file.type, 'Size:', file.size);
     }
+    setUploadedFile(file);
+    setDiscoveredTags([]);
     setQuery4Results([]);
   };
 
-  // Search logic for Query 4
-  const handleSearchByFileTags = () => {
-    if (discoveredTags.length === 0) return;
-    const results = mockMedia.filter(item =>
-      discoveredTags.every(tag => item.species && item.species[tag] && item.species[tag] > 0)
-    );
-    setQuery4Results(results);
+  // Add this helper function before handleSearchByFileTags
+  const convertFileToBase64 = (file: File) => {
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        // Remove the data:image/jpeg;base64, prefix
+        const base64 = (reader.result as string).split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = error => reject(error);
+    });
+  };
+
+  // Replace the existing handleSearchByFileTags function
+  const handleSearchByFileTags = async () => {
+    if (!uploadedFile) {
+      showToast('Please upload a file first', 'error');
+      return;
+    }
+
+    try {
+      console.log('Processing file:', uploadedFile.name, 'Type:', uploadedFile.type);
+      
+      // Convert file to base64
+      console.log('Converting file to base64...');
+      const fileBase64 = await convertFileToBase64(uploadedFile);
+      console.log('File converted to base64, length:', fileBase64.length);
+      
+      const token = sessionStorage.getItem('idToken');
+      console.log('Making API request to queryByFile...');
+      
+      const requestBody = {
+        fileB64: fileBase64,
+        filename: uploadedFile.name,
+        contentType: uploadedFile.type
+      };
+      
+      console.log('Request body structure:', {
+        filename: requestBody.filename,
+        contentType: requestBody.contentType,
+        fileB64Length: requestBody.fileB64.length
+      });
+      
+      const res = await fetch('https://uwxthsjzpg.execute-api.us-east-1.amazonaws.com/prod/queryByFile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      console.log('API Response status:', res.status);
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        console.error('API Error:', errorData);
+        throw new Error(errorData.error || `API error: ${res.status}`);
+      }
+
+      const data = await res.json();
+      console.log('API Response data:', data);
+      
+      if (!data.links) {
+        console.error('Malformed response:', data);
+        throw new Error('Malformed response from server');
+      }
+
+      // Transform the API response to match your UI format
+      const results = data.links.map((item: any, idx: number) => ({
+        id: idx + 1,
+        type: item.thumbURL ? 'image' : (item.fileURL.endsWith('.mp4') ? 'video' : 'audio'),
+        url: item.thumbURL || item.fileURL,
+        filename: item.fileURL.split('/').pop() || '',
+        species: item.tags || {},
+        uploader: item.uploader || '',
+        date: item.date || '',
+        fileURL: item.fileURL,
+        thumbURL: item.thumbURL
+      }));
+
+      console.log('Transformed results:', results);
+      
+      setQuery4Results(results);
+      
+      // Extract discovered tags from all results
+      const allTags = new Set<string>();
+      results.forEach(result => {
+        if (result.species) {
+          Object.keys(result.species).forEach(tag => allTags.add(tag));
+        }
+      });
+      setDiscoveredTags(Array.from(allTags));
+      
+      showToast(`Found ${results.length} matching files based on uploaded file tags`, 'success');
+    } catch (err) {
+      console.error('Error in handleSearchByFileTags:', err);
+      showToast(err instanceof Error ? err.message : 'Failed to search by file tags', 'error');
+      setQuery4Results([]);
+      setDiscoveredTags([]);
+    }
   };
 
   const clearQuery4 = () => {
@@ -480,7 +571,7 @@ const BrowsePage = () => {
     setBulkResult('');
     try {
       const token = sessionStorage.getItem('idToken');
-      const res = await fetch('https://uwxthsjzpg.execute-api.us-east-1.amazonaws.com/prod/manage-tags', {
+      const res = await fetch('https://uwxthsjzpg.execute-api.us-east-1.amazonaws.com/prod/manageTags', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -510,14 +601,41 @@ const BrowsePage = () => {
     }
   };
 
-  const handleBulkDeleteFiles = () => {
+  const handleBulkDeleteFiles = async () => {
     if (!deleteUrls.trim()) {
       setDeleteResult('Please provide at least one file URL.');
       return;
     }
     const urlList = deleteUrls.split(/\s|,/).map(u => u.trim()).filter(Boolean);
-    setDeleteResult(`Deleted files: ${urlList.join(', ')}`);
-    // In a real app, call the backend API to delete files and their thumbnails
+    setDeleteResult('');
+    try {
+      const token = sessionStorage.getItem('idToken');
+      const res = await fetch('https://uwxthsjzpg.execute-api.us-east-1.amazonaws.com/prod/deleteFiles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          urls: urlList
+        })
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        setDeleteResult(`API error: ${res.status} ${errorData.error || ''}`);
+        return;
+      }
+      const data = await res.json();
+      if (!data.deleted) {
+        setDeleteResult('Malformed response from server.');
+        return;
+      }
+      // Format the result for display
+      const resultText = data.deleted.map((item: any) => `${item.url}: ${item.status}`).join('\n');
+      setDeleteResult(resultText);
+    } catch (err) {
+      setDeleteResult('Failed to delete files.');
+    }
   };
 
   const clearBulkDelete = () => {
@@ -785,7 +903,13 @@ const BrowsePage = () => {
             <div className="search-row">
               <div className="species-input-group">
                 <input type="file" onChange={handleFileUpload} />
-                <button className="search-btn" onClick={handleSearchByFileTags} disabled={!uploadedFile || discoveredTags.length === 0}>SEARCH</button>
+                <button 
+                  className="search-btn" 
+                  onClick={handleSearchByFileTags} 
+                  disabled={!uploadedFile}
+                >
+                  SEARCH
+                </button>
                 <button className="clear-btn" onClick={clearQuery4}>CLEAR</button>
               </div>
             </div>

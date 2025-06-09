@@ -25,9 +25,11 @@ const HomePage = () => {
   const [subscribedTags, setSubscribedTags] = useState<string[]>([]);
   const [emailNotifications, setEmailNotifications] = useState<{ [key: string]: boolean }>({});
   const [tagInput, setTagInput] = useState('');
+  const [isSubscribing, setIsSubscribing] = useState(false);
 
   var idToken = parseJwt(sessionStorage.idToken.toString());
   var accessToken = parseJwt(sessionStorage.accessToken.toString());
+  const userEmail = idToken.email; // Get email from the decoded ID token
   console.log ("Amazon Cognito ID token encoded: " + sessionStorage.idToken.toString());
   console.log ("Amazon Cognito ID token decoded: ");
   console.log ( idToken );
@@ -44,14 +46,14 @@ const HomePage = () => {
   };
 
   // Tag-based Notifications UI
-  const handleSubscribe = () => {
+  const handleSubscribe = async () => {
     if (!tagInput.trim()) {
       showToast('Please enter at least one tag', 'error');
       return;
     }
 
     const newTags = tagInput.split(',')
-      .map(tag => tag.trim().toLowerCase())
+      .map(tag => tag.trim())
       .filter(tag => tag && !subscribedTags.includes(tag));
 
     if (newTags.length === 0) {
@@ -59,22 +61,91 @@ const HomePage = () => {
       return;
     }
 
-    setSubscribedTags([...subscribedTags, ...newTags]);
-    showToast(`Subscribed to notifications for: ${newTags.join(', ')}`, 'success');
-    setTagInput('');
+    setIsSubscribing(true);
+    try {
+      // Subscribe each tag to SNS
+      for (const tag of newTags) {
+        const res = await fetch('https://uwxthsjzpg.execute-api.us-east-1.amazonaws.com/prod/send_notification_sns', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sessionStorage.idToken}`
+          },
+          body: JSON.stringify({
+            species: tag,
+            email: userEmail
+          })
+        });
+
+        if (!res.ok) {
+          throw new Error(`Failed to subscribe to ${tag}`);
+        }
+      }
+
+      setSubscribedTags([...subscribedTags, ...newTags]);
+      showToast(`Subscribed to notifications for: ${newTags.join(', ')}`, 'success');
+      setTagInput('');
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to subscribe to notifications', 'error');
+    } finally {
+      setIsSubscribing(false);
+    }
   };
 
-  const handleRemoveTag = (tagToRemove: string) => {
-    setSubscribedTags(subscribedTags.filter(tag => tag !== tagToRemove));
-    showToast(`Unsubscribed from notifications for ${tagToRemove}`, 'info');
+  const handleRemoveTag = async (tagToRemove: string) => {
+    try {
+      // Unsubscribe from SNS
+      const res = await fetch('https://uwxthsjzpg.execute-api.us-east-1.amazonaws.com/prod/send_notification_sns', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionStorage.idToken}`
+        },
+        body: JSON.stringify({
+          species: tagToRemove,
+          email: userEmail
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to unsubscribe from ${tagToRemove}`);
+      }
+
+      setSubscribedTags(subscribedTags.filter(tag => tag !== tagToRemove));
+      showToast(`Unsubscribed from notifications for ${tagToRemove}`, 'success');
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to unsubscribe', 'error');
+    }
   };
 
-  const handleEmailNotification = (tag: string) => {
-    setEmailNotifications(prev => ({
-      ...prev,
-      [tag]: !prev[tag]
-    }));
-    showToast(`Email notifications ${emailNotifications[tag] ? 'disabled' : 'enabled'} for ${tag}`, 'info');
+  const handleEmailNotification = async (tag: string) => {
+    try {
+      const newStatus = !emailNotifications[tag];
+      const res = await fetch('https://uwxthsjzpg.execute-api.us-east-1.amazonaws.com/prod/send_notification_sns', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionStorage.idToken}`
+        },
+        body: JSON.stringify({
+          species: tag,
+          email: userEmail,
+          enableNotifications: newStatus
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to update notification settings for ${tag}`);
+      }
+
+      setEmailNotifications(prev => ({
+        ...prev,
+        [tag]: newStatus
+      }));
+      showToast(`Email notifications ${newStatus ? 'enabled' : 'disabled'} for ${tag}`, 'success');
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to update notification settings', 'error');
+    }
   };
 
 /*eslint-enable*/
@@ -120,9 +191,14 @@ const HomePage = () => {
               onChange={(e) => setTagInput(e.target.value)}
               placeholder="Enter tags separated by commas (e.g., crow, pigeon)"
               className="tag-input"
+              disabled={isSubscribing}
             />
-            <button onClick={handleSubscribe} className="add-tag-btn">
-              Add Tags
+            <button 
+              onClick={handleSubscribe} 
+              className="add-tag-btn"
+              disabled={isSubscribing}
+            >
+              {isSubscribing ? 'Subscribing...' : 'Add Tags'}
             </button>
           </div>
           <div className="subscribed-tags">
